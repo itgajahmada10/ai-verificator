@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Verificator — Enterprise Logistics</title>
+    <title>AI Verificator — Logistics Audit</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,50 +13,79 @@
 
     <style>
         :root {
-            --primary: #4A235A;
-            --primary-hover: #311432;
+            /* Warna dibedakan dari Web Feeder agar lu tidak tertukar saat buka tab */
+            --primary: #1F618D; 
+            --primary-hover: #154360;
             --bg-body: #f4f6f9;
             --bg-card: #ffffff;
             --border-color: #e0e0e0;
             --text-main: #333;
             --text-muted: #666;
-            --accent: #b9770e;
             --success: #1e8449;
+            --error: #cb4335;
         }
 
         * { box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
-        body { margin: 0; padding: 0; display: flex; height: 100vh; background-color: var(--bg-body); color: var(--text-main); }
-
-        /* Left Panel / Form */
-        .left-panel { 
-            width: 30%; 
-            background-color: var(--bg-card); 
-            padding: 40px 30px; 
-            box-shadow: 4px 0 15px rgba(0,0,0,0.05); 
-            z-index: 10; 
+        
+        body { 
+            margin: 0; 
+            padding: 20px; 
             display: flex; 
-            flex-direction: column; 
-            overflow-y: auto; 
-            border-right: 1px solid var(--border-color);
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            background-color: var(--bg-body); 
+            color: var(--text-main); 
         }
 
-        .left-panel h2 { 
-            color: var(--primary); 
-            margin: 0 0 30px 0; 
-            font-size: 24px; 
-            font-weight: 800; 
+        .card {
+            background-color: var(--bg-card);
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border: 1px solid var(--border-color);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h2 {
+            color: var(--primary);
+            margin: 0 0 8px 0;
+            font-size: 24px;
+            font-weight: 800;
             letter-spacing: -0.5px;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 10px;
         }
 
-        .form-group { margin-bottom: 24px; }
-        label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-main); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .header p {
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .form-group { margin-bottom: 20px; }
         
-        select, input[type="file"], input[type="password"] { 
+        label { 
+            display: block; 
+            font-weight: 600; 
+            margin-bottom: 8px; 
+            color: var(--text-main); 
+            font-size: 12px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+        }
+        
+        input[type="text"], input[type="password"], select, input[type="file"] { 
             width: 100%; 
-            padding: 12px; 
+            padding: 14px; 
             border: 1px solid #ccc; 
             border-radius: 8px; 
             font-size: 14px; 
@@ -64,7 +93,18 @@
             transition: all 0.2s ease;
         }
 
-        select:focus, input:focus { border-color: var(--primary); outline: none; background-color: #fff; box-shadow: 0 0 0 3px rgba(74, 35, 90, 0.1); }
+        input:focus, select:focus { 
+            border-color: var(--primary); 
+            outline: none; 
+            background-color: #fff; 
+            box-shadow: 0 0 0 3px rgba(31, 97, 141, 0.1); 
+        }
+
+        input[type="file"] {
+            padding: 10px;
+            background-color: #fff;
+            cursor: pointer;
+        }
 
         button { 
             background-color: var(--primary); 
@@ -84,182 +124,126 @@
             gap: 10px;
         }
 
-        button:hover { background-color: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(74, 35, 90, 0.2); }
+        button:hover { background-color: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(31, 97, 141, 0.2); }
         button:disabled { background-color: #aeb6bf; cursor: not-allowed; transform: none; box-shadow: none; }
 
-        /* Right Panel / Output */
-        .right-panel { width: 70%; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; }
-        .output-container { 
-            background-color: var(--bg-card); 
-            padding: 40px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 25px rgba(0,0,0,0.04); 
-            min-height: 100%; 
-            border: 1px solid var(--border-color);
-            position: relative;
+        /* Output Box untuk Keputusan AI */
+        #resultBox {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.6;
+            display: none;
+            border-left: 5px solid var(--primary);
+            background-color: #f8f9fa;
         }
 
-        .empty-state { text-align: center; color: var(--text-muted); margin-top: 20%; }
+        .status-error { background-color: #fadbd8; border-left: 5px solid var(--error); color: var(--error); padding: 15px; border-radius: 8px; margin-top: 25px; display: none;}
         
-        #downloadBtn { 
-            background-color: var(--success); 
-            margin-top: 20px; 
-            display: none; 
-            align-self: flex-end;
-            width: auto;
-            padding: 12px 25px;
-        }
-
-        /* Loading States */
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid white; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .loading-step { margin-bottom: 10px; font-size: 14px; color: var(--text-muted); display: flex; align-items: center; gap: 10px; justify-content: center; }
-        .loading-step.active { color: var(--primary); font-weight: 600; }
-        .loading-step.done { color: var(--success); }
-
-        @media print {
-            body { display: block; background: white; }
-            .left-panel, #downloadBtn { display: none !important; }
-            .right-panel { width: 100%; padding: 0; }
-            .output-container { box-shadow: none; border: none; padding: 0; }
-        }
     </style>
 </head>
 <body>
 
-    <div class="left-panel">
-        <h2><i data-lucide="shield-check"></i> AI Verificator</h2>
+    <div class="card">
+        <div class="header">
+            <h2><i data-lucide="shield-check"></i> AI Verificator</h2>
+            <p>Sistem Audit Requisition Otomatis</p>
+        </div>
         
-        <form id="uploadForm">
+        <form id="auditForm">
             <div class="form-group">
-                <label>Auth PIN Access</label>
-                <input type="password" id="authPin" placeholder="Masukkan 6 Digit PIN" required>
+                <label>AUTH PIN</label>
+                <input type="password" id="authPin" placeholder="Masukkan PIN Auditor" required>
             </div>
 
             <div class="form-group">
-                <label>Tipe Engine</label>
+                <label>Nama Kapal (Kunci Pencarian DB)</label>
+                <input type="text" id="vesselName" placeholder="Contoh: MV. ASIAN WISDOM" required>
+            </div>
+
+            <div class="form-group">
+                <label>Tipe Engine / Departemen</label>
                 <select id="engineType" required>
                     <option value="ME">Main Engine (ME)</option>
-                    <option value="AE">Auxiliary Engine (AE)</option>
+                    <option value="AE 1">Auxiliary Engine 1 (AE 1)</option>
+                    <option value="AE 2">Auxiliary Engine 2 (AE 2)</option>
+                    <option value="AE 3">Auxiliary Engine 3 (AE 3)</option>
+                    <option value="DECK CRANE">Deck Crane</option>
+                    <option value="BOILER">Boiler</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label>Requisition Form (PDF)</label>
-                <input type="file" id="reqFile" accept="application/pdf" required>
-            </div>
-
-            <div class="form-group">
-                <label>Running Hours (PDF/Excel)</label>
-                <input type="file" id="rhFile" accept="application/pdf, .xlsx, .xls, .csv" required>
+                <label>Dokumen Permintaan (Requisition / PO)</label>
+                <input type="file" id="reqFile" accept="application/pdf, .xlsx, .xls" required>
+                <small style="color: var(--text-muted); font-size: 11px; margin-top: 5px; display: block;">*Sistem akan otomatis mencari data Running Hours ke Database AppSheet.</small>
             </div>
 
             <button type="submit" id="submitBtn">
-                <i data-lucide="zap"></i> PROSES LAPORAN
+                <i data-lucide="cpu"></i> MULAI AUDIT DOKUMEN
             </button>
         </form>
-    </div>
 
-    <div class="right-panel">
-        <div class="output-container" id="outputArea">
-            <div class="empty-state">
-                <i data-lucide="file-text" size="48" style="margin-bottom: 15px; opacity: 0.3;"></i>
-                <p>Silakan isi form di sebelah kiri untuk menghasilkan laporan validasi.</p>
-            </div>
-        </div>
-        <button id="downloadBtn" onclick="window.print()">
-            <i data-lucide="download"></i> DOWNLOAD PDF
-        </button>
+        <div id="resultBox"></div>
+        <div id="errorBox" class="status-error"></div>
     </div>
 
     <script>
-        // INIT ICONS
         lucide.createIcons();
 
-        // KONFIGURASI URL (Ganti URL ini jika endpoint n8n lu berubah)
-        const UPLOAD_URL = "https://n8.waruna-group.co.id/webhook/277b56f1-5761-412a-9be5-86298d5aa5de";
-        const CHECK_URL = "https://n8.waruna-group.co.id/webhook/cek-hasil";
+        // GANTI INI DENGAN URL WEBHOOK N8N UNTUK AI VERIFICATOR LU
+        const WEBHOOK_URL = "https://n8.waruna-group.co.id/webhook/ai-verificator"; 
 
-        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+        document.getElementById('auditForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const btn = document.getElementById('submitBtn');
-            const outputArea = document.getElementById('outputArea');
-            const downloadBtn = document.getElementById('downloadBtn');
-            const pin = document.getElementById('authPin').value;
+            const resultBox = document.getElementById('resultBox');
+            const errorBox = document.getElementById('errorBox');
 
-            // Generate Unique Job ID
-            const jobId = "JOB_" + Date.now();
-
-            // Setup Form Data
+            // Reset UI
+            resultBox.style.display = 'none';
+            errorBox.style.display = 'none';
+            
+            // Build Payload
             const formData = new FormData();
-            formData.append('auth_pin', pin); // Keamanan PIN
-            formData.append('job_id', jobId);
+            formData.append('auth_pin', document.getElementById('authPin').value);
+            formData.append('vessel_name', document.getElementById('vesselName').value.toUpperCase());
             formData.append('engine_type', document.getElementById('engineType').value);
-            formData.append('Requisition_Form', document.getElementById('reqFile').files[0]);
-            formData.append('Running_Hours_Report', document.getElementById('rhFile').files[0]);
+            
+            // HANYA MENGIRIM 1 FILE SEKARANG
+            formData.append('Requisition_Report', document.getElementById('reqFile').files[0]);
 
-            // UI Loading State
+            // Loading UI
             btn.disabled = true;
-            btn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Memproses...';
-            downloadBtn.style.display = 'none';
-            
-            outputArea.innerHTML = `
-                <div style="text-align:center; margin-top: 15%;">
-                    <div class="loader"></div>
-                    <h3 style="color:var(--primary); font-weight:700;">AI Sedang Memproses Laporan</h3>
-                    <p style="color:var(--text-muted); margin-bottom:30px;">Harap tunggu, proses ini memakan waktu 1-2 menit.</p>
-                    <div id="step1" class="loading-step active">● Mengunggah dokumen ke server...</div>
-                    <div id="step2" class="loading-step">○ AI menganalisis data & mencocokkan master...</div>
-                    <div id="step3" class="loading-step">○ Menunggu antrean database...</div>
-                    <div id="pingStatus" style="font-size: 12px; margin-top: 20px; color: var(--success); font-weight:600;"></div>
-                </div>`;
-            
-            lucide.createIcons();
+            btn.innerHTML = '<div class="loader"></div> Mengaudit Dokumen...';
 
             try {
-                // 1. Kirim File
-                let uploadRes = await fetch(UPLOAD_URL, { method: 'POST', body: formData });
-                if (!uploadRes.ok) throw new Error("Akses Ditolak atau PIN Salah.");
+                let response = await fetch(WEBHOOK_URL, { 
+                    method: 'POST', 
+                    body: formData 
+                });
 
-                document.getElementById('step1').className = "loading-step done";
-                document.getElementById('step1').innerHTML = "✓ Dokumen berhasil diunggah.";
-                document.getElementById('step2').className = "loading-step active";
+                if (!response.ok) {
+                    throw new Error("Koneksi ditolak oleh Server n8n atau PIN Salah.");
+                }
 
-                // 2. Polling Hasil (Cek 10 Gerbong HTML)
-                let pollInterval = setInterval(async () => {
-                    try {
-                        const pingStatus = document.getElementById('pingStatus');
-                        if(pingStatus) pingStatus.innerText = "Memeriksa status hasil...";
+                let data = await response.json();
 
-                        let checkRes = await fetch(`${CHECK_URL}?job_id=${jobId}`);
-                        let data = await checkRes.json();
-
-                        if (data.status === "selesai" && data.html) {
-                            clearInterval(pollInterval);
-                            outputArea.innerHTML = data.html; // Render hasil gabungan html_part1 s/d 10
-                            downloadBtn.style.display = 'block';
-                            btn.disabled = false;
-                            btn.innerHTML = '<i data-lucide="zap"></i> PROSES LAPORAN BARU';
-                        } else {
-                            // Masih proses
-                            document.getElementById('step2').className = "loading-step done";
-                            document.getElementById('step2').innerHTML = "✓ Analisis AI selesai.";
-                            document.getElementById('step3').className = "loading-step active";
-                        }
-                    } catch (err) {
-                        console.log("Menunggu server...");
-                    }
-                }, 5000);
+                // Tampilkan Hasil Analisis AI
+                resultBox.style.display = 'block';
+                // Asumsi n8n merespon dengan JSON: { "status": "success", "ai_analysis": "..." }
+                resultBox.innerHTML = `<strong>Hasil Audit AI:</strong><br><br>${data.ai_analysis || "Audit selesai, namun tidak ada teks analisis yang dikembalikan oleh n8n."}`;
 
             } catch (error) {
-                outputArea.innerHTML = `<div class="empty-state" style="color:var(--accent); font-weight:600;">
-                    <i data-lucide="alert-triangle" size="48"></i><br><br>
-                    GAGAL: ${error.message}
-                </div>`;
+                errorBox.style.display = 'block';
+                errorBox.innerHTML = `<i data-lucide="alert-triangle" style="vertical-align: middle;"></i> ${error.message}`;
+            } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i data-lucide="zap"></i> COBA LAGI';
+                btn.innerHTML = '<i data-lucide="cpu"></i> MULAI AUDIT DOKUMEN';
                 lucide.createIcons();
             }
         });
