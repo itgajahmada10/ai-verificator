@@ -4,109 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Verificator — Unified Logistics Portal</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
 
     <style>
         :root {
-            --primary: #1F618D; 
-            --primary-hover: #154360;
-            --bg-body: #f4f6f9;
-            --bg-card: #ffffff;
-            --border-color: #e0e0e0;
-            --text-main: #333;
-            --text-muted: #666;
-            --success: #1e8449;
-            --error: #cb4335;
-            --accent-rh: #e8f8f5;
-            --accent-req: #fef9e7;
+            --primary: #1F618D; --primary-hover: #154360; --bg-body: #f4f6f9; --bg-card: #ffffff;
+            --border-color: #e0e0e0; --text-main: #333; --text-muted: #666;
+            --success: #1e8449; --error: #cb4335; --warning: #d4ac0d;
+            --accent-rh: #e8f8f5; --accent-req: #fef9e7;
         }
-
         * { box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+        body { margin: 0; padding: 40px 20px; background-color: var(--bg-body); color: var(--text-main); }
         
-        body { 
-            margin: 0; 
-            padding: 40px 20px; 
-            background-color: var(--bg-body); 
-            color: var(--text-main); 
-        }
-
-        /* STRUKTUR DUA KOLOM */
-        .layout-wrapper {
-            display: flex;
-            gap: 25px;
-            max-width: 1500px;
-            margin: 0 auto;
-            align-items: flex-start;
-            flex-wrap: wrap;
-        }
-
-        /* KOLOM KIRI (FORM) */
-        .form-column {
-            flex: 1 1 450px;
-            max-width: 500px;
-            background-color: var(--bg-card);
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            border: 1px solid var(--border-color);
-        }
-
-        /* KOLOM KANAN (LAPORAN) */
-        .report-column {
-            flex: 2 1 700px;
-            background-color: var(--bg-card);
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            border: 1px solid var(--border-color);
-            display: none; 
-            max-height: 85vh;
-            overflow-y: auto;
-        }
-
-        .header { text-align: center; margin-bottom: 30px; }
-        .header h2 { color: var(--primary); margin: 0 0 8px 0; font-size: 24px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .header p { color: var(--text-muted); margin: 0; font-size: 14px; }
-
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-main); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .layout-wrapper { display: flex; gap: 25px; max-width: 1600px; margin: 0 auto; align-items: flex-start; flex-wrap: wrap; }
+        .form-column { flex: 1 1 400px; max-width: 450px; background-color: var(--bg-card); padding: 35px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid var(--border-color); }
+        .report-column { flex: 2 1 800px; background-color: var(--bg-card); padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid var(--border-color); display: none; }
         
-        input[type="text"], input[type="password"], select { 
-            width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 8px; 
-            font-size: 14px; background-color: #fafafa; transition: all 0.2s ease;
-        }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h2 { color: var(--primary); margin: 0 0 8px 0; font-size: 22px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .header p { color: var(--text-muted); margin: 0; font-size: 13px; }
 
-        input:focus, select:focus { border-color: var(--primary); outline: none; background-color: #fff; box-shadow: 0 0 0 3px rgba(31, 97, 141, 0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: 600; margin-bottom: 6px; color: var(--text-main); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        input[type="text"], input[type="password"], select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 13px; background-color: #fafafa; }
+        input:focus, select:focus { border-color: var(--primary); outline: none; background-color: #fff; }
         
-        .upload-section {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px dashed var(--primary);
-        }
-        
+        .upload-section { padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed var(--primary); }
         .upload-section.rh { background-color: var(--accent-rh); border-color: #a3e4d7; }
         .upload-section.req { background-color: var(--accent-req); border-color: #f9e79f; }
-        
-        .upload-section label { color: var(--primary); display: flex; align-items: center; gap: 5px; margin-bottom: 10px;}
-        input[type="file"] { width: 100%; padding: 10px; background-color: #fff; border-radius: 6px; border: 1px solid #ccc; cursor: pointer; font-size: 13px;}
+        .upload-section label { color: var(--primary); display: flex; align-items: center; gap: 5px; margin-bottom: 8px; font-size: 12px;}
+        input[type="file"] { width: 100%; padding: 8px; background-color: #fff; border-radius: 6px; border: 1px solid #ccc; cursor: pointer; font-size: 12px;}
 
-        button.btn-submit { 
-            background-color: var(--primary); color: white; border: none; padding: 16px; 
-            width: 100%; font-size: 15px; font-weight: 700; border-radius: 8px; cursor: pointer; 
-            transition: 0.3s; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 10px;
-        }
-        button.btn-submit:hover { background-color: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(31, 97, 141, 0.2); }
-        button.btn-submit:disabled { background-color: #aeb6bf; cursor: not-allowed; transform: none; box-shadow: none; }
+        button.btn-submit { background-color: var(--primary); color: white; border: none; padding: 15px; width: 100%; font-size: 14px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        button.btn-submit:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
+        button.btn-submit:disabled { background-color: #aeb6bf; cursor: not-allowed; transform: none; }
 
-        #resultBox { margin-top: 25px; padding: 20px; border-radius: 8px; font-size: 14px; line-height: 1.6; display: none; border-left: 5px solid var(--success); background-color: #e9f7ef; color: var(--success); }
-        .status-error { background-color: #fadbd8; border-left: 5px solid var(--error); color: var(--error); padding: 15px; border-radius: 8px; margin-top: 25px; display: none;}
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid white; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        #resultBox { margin-top: 20px; padding: 15px; border-radius: 8px; font-size: 13px; display: none; border-left: 5px solid var(--success); background-color: #e9f7ef; color: var(--success); }
+        .status-error { background-color: #fadbd8; border-left: 5px solid var(--error); color: var(--error); padding: 15px; border-radius: 8px; margin-top: 20px; font-size: 13px; display: none;}
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid white; border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* TABEL STYLE */
+        .table-responsive { width: 100%; overflow-x: auto; margin-top: 15px; border-radius: 8px; border: 1px solid #eee; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
+        th { background-color: #f4f6f9; padding: 12px; text-align: left; font-weight: 700; color: #333; border-bottom: 2px solid #ddd; }
+        td { padding: 12px; border-bottom: 1px solid #eee; vertical-align: top; }
+        tr:hover { background-color: #f9f9f9; }
+        
+        .badge { padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
+        .badge-aman { background-color: #e9f7ef; color: #1e8449; border: 1px solid #a3e4d7; }
+        .badge-pangkas { background-color: #fadbd8; color: #cb4335; border: 1px solid #f5b7b1; }
+        .badge-kurang { background-color: #fcf3cf; color: #d4ac0d; border: 1px solid #f9e79f; }
+
+        .btn-download { background-color: #27ae60; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s;}
+        .btn-download:hover { background-color: #1e8449; }
     </style>
 </head>
 <body>
@@ -117,13 +69,11 @@
                 <h2><i data-lucide="shield-check"></i> SPB Logistics Portal</h2>
                 <p>Sistem Terpusat Update RH & Audit Permintaan</p>
             </div>
-            
             <form id="auditForm">
                 <div class="form-group">
                     <label>AUTH PIN</label>
                     <input type="password" id="authPin" placeholder="Masukkan PIN SPB" required>
                 </div>
-                
                 <div class="form-group" style="display: flex; gap: 15px;">
                     <div style="flex: 1;">
                         <label>Nama Kapal</label>
@@ -140,112 +90,163 @@
                         </select>
                     </div>
                 </div>
-
                 <div class="upload-section rh">
-                    <label><i data-lucide="clock" style="width: 16px;"></i> OPSI 1: Update Laporan Jam Kerja (RH)</label>
+                    <label><i data-lucide="clock"></i> OPSI 1: Update Jam Kerja (RH)</label>
                     <input type="file" id="rhFile" accept="application/pdf, .xlsx, .xls">
-                    <small style="color: #555; font-size: 11px; margin-top: 5px; display: block;">*Boleh dikosongkan jika hanya ingin mengaudit permintaan.</small>
                 </div>
-
                 <div class="upload-section req">
-                    <label><i data-lucide="file-text" style="width: 16px;"></i> OPSI 2: Audit Permintaan Barang (Req/PO)</label>
+                    <label><i data-lucide="file-text"></i> OPSI 2: Audit Permintaan (Req/PO)</label>
                     <input type="file" id="reqFile" accept="application/pdf, .xlsx, .xls">
-                    <small style="color: #555; font-size: 11px; margin-top: 5px; display: block;">*Boleh dikosongkan jika hanya ingin update RH bulanan.</small>
                 </div>
-
                 <button type="submit" id="submitBtn" class="btn-submit">
                     <i data-lucide="send"></i> PROSES DATA SEKARANG
                 </button>
             </form>
-
             <div id="resultBox"></div>
             <div id="errorBox" class="status-error"></div>
         </div>
 
         <div class="report-column" id="reportPanel">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; border-bottom:2px solid #eee; padding-bottom:15px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:2px solid #eee; padding-bottom:15px;">
                 <h3 style="margin:0; color:var(--primary); display:flex; align-items:center; gap:8px;">
-                    <i data-lucide="file-bar-chart-2"></i> Hasil Eksekusi Sistem
+                    <i data-lucide="table"></i> Hasil Audit AI
                 </h3>
-                <button type="button" onclick="document.getElementById('reportPanel').style.display='none'" style="background:#f4f6f9; border:1px solid #ccc; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:600; color:#555;">Tutup Panel</button>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" id="btnDownload" class="btn-download"><i data-lucide="download" style="width:14px;"></i> Download CSV</button>
+                    <button type="button" onclick="document.getElementById('reportPanel').style.display='none'" style="background:#f4f6f9; border:1px solid #ccc; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:600; color:#555; font-size: 12px;">Tutup</button>
+                </div>
             </div>
-            <div id="reportContent" style="width: 100%; overflow-x: auto;"></div>
+            <div class="table-responsive">
+                <table id="auditTable">
+                    <thead>
+                        <tr>
+                            <th>Barang</th>
+                            <th>No Part</th>
+                            <th>Req</th>
+                            <th>ROB</th>
+                            <th>Limit</th>
+                            <th>Target Cyl</th>
+                            <th>Rekomendasi AI</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <script>
         if (typeof lucide !== 'undefined') { lucide.createIcons(); }
-
-        // URL WEBHOOK N8N LU TETAP SAMA
         const WEBHOOK_URL = "https://n8.waruna-group.co.id/webhook/277b56f1-5761-412a-9be5-86298d5aa5de";
+        let currentAuditData = []; // Simpan data untuk di-download
 
         document.getElementById('auditForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
             const btn = document.getElementById('submitBtn');
             const resultBox = document.getElementById('resultBox');
             const errorBox = document.getElementById('errorBox');
             const reportPanel = document.getElementById('reportPanel');
-            const reportContent = document.getElementById('reportContent');
+            const tableBody = document.getElementById('tableBody');
 
-            // Validasi: Harus isi minimal salah satu file
             const rhFile = document.getElementById('rhFile').files[0];
             const reqFile = document.getElementById('reqFile').files[0];
             
             if (!rhFile && !reqFile) {
                 errorBox.style.display = 'block';
-                errorBox.innerHTML = `<i data-lucide="alert-triangle" style="vertical-align: middle;"></i> Mohon unggah minimal Laporan RH atau Dokumen Permintaan.`;
-                if (typeof lucide !== 'undefined') { lucide.createIcons(); }
+                errorBox.innerHTML = `Mohon unggah minimal Laporan RH atau Dokumen Permintaan.`;
                 return;
             }
 
-            resultBox.style.display = 'none';
-            errorBox.style.display = 'none';
-            reportPanel.style.display = 'none';
+            resultBox.style.display = 'none'; errorBox.style.display = 'none'; reportPanel.style.display = 'none'; tableBody.innerHTML = '';
             
             const formData = new FormData();
             formData.append('auth_pin', document.getElementById('authPin').value);
             formData.append('vessel_name', document.getElementById('vesselName').value.toUpperCase());
             formData.append('engine_type', document.getElementById('engineType').value);
-            
-            // Append file hanya jika ada isinya
             if (rhFile) formData.append('RH_Report', rhFile);
             if (reqFile) formData.append('Requisition_Report', reqFile);
 
             btn.disabled = true;
-            btn.innerHTML = '<div class="loader"></div> Mengirim & Memproses Data...';
+            btn.innerHTML = '<div class="loader"></div> Memproses Data...';
 
             try {
-                let response = await fetch(WEBHOOK_URL, { 
-                    method: 'POST', 
-                    body: formData 
-                });
-
-                if (!response.ok) throw new Error("Koneksi ditolak oleh Server n8n atau PIN Salah.");
-
-                let rawText = await response.text();
-                let data = JSON.parse(rawText);
+                let response = await fetch(WEBHOOK_URL, { method: 'POST', body: formData });
+                if (!response.ok) throw new Error("Koneksi ditolak oleh Server n8n.");
+                
+                let data = await response.json();
 
                 if (data.status === "success") {
                     resultBox.style.display = 'block';
-                    resultBox.innerHTML = `<strong><i data-lucide="check-circle" style="vertical-align: middle; width:18px;"></i> Berhasil!</strong><br><br>${data.message}`;
+                    resultBox.innerHTML = `<strong>Berhasil!</strong><br>${data.message}`;
                     
-                    if (data.html_report) {
+                    // JIKA N8N MENGEMBALIKAN DATA JSON (audit_data)
+                    if (data.audit_data && Array.isArray(data.audit_data) && data.audit_data.length > 0) {
+                        currentAuditData = data.audit_data;
+                        
+                        data.audit_data.forEach(item => {
+                            let statusClass = "badge-aman";
+                            let statusText = item.Rekomendasi_AI.toUpperCase();
+                            
+                            if (statusText.includes("DIPANGKAS") || statusText.includes("TIDAK MATCH") || statusText.includes("KOSONG")) {
+                                statusClass = "badge-pangkas";
+                            } else if (statusText.includes("KURANG")) {
+                                statusClass = "badge-kurang";
+                            }
+
+                            let tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;" title="${item.Nama_Barang}">${item.Nama_Barang}</td>
+                                <td>${item.No_Part}</td>
+                                <td><strong>${item.Qty_Diminta}</strong></td>
+                                <td>${item.ROB}</td>
+                                <td>${item.Max_Limit_Jam}</td>
+                                <td>${item.Target_Cylinder}</td>
+                                <td><span class="badge ${statusClass}">${item.Rekomendasi_AI}</span></td>
+                            `;
+                            tableBody.appendChild(tr);
+                        });
                         reportPanel.style.display = 'block';
-                        reportContent.innerHTML = data.html_report;
                     }
                 } else {
                     throw new Error(data.message || "Terjadi kesalahan sistem.");
                 }
-
             } catch (error) {
                 errorBox.style.display = 'block';
-                errorBox.innerHTML = `<i data-lucide="alert-triangle" style="vertical-align: middle;"></i> ${error.message}`;
+                errorBox.innerHTML = error.message;
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i data-lucide="send"></i> PROSES DATA SEKARANG';
                 if (typeof lucide !== 'undefined') { lucide.createIcons(); }
             }
+        });
+
+        // FUNGSI DOWNLOAD CSV
+        document.getElementById('btnDownload').addEventListener('click', function() {
+            if (currentAuditData.length === 0) return;
+            
+            // Bikin Header CSV
+            let csvContent = "data:text/csv;charset=utf-8,";
+            let headers = Object.keys(currentAuditData[0]).join(",");
+            csvContent += headers + "\r\n";
+            
+            // Bikin Baris Data CSV
+            currentAuditData.forEach(function(rowObj) {
+                let row = Object.values(rowObj).map(val => {
+                    // Escape tanda koma atau kutip agar format Excel tidak hancur
+                    let strVal = String(val).replace(/"/g, '""');
+                    return `"${strVal}"`;
+                }).join(",");
+                csvContent += row + "\r\n";
+            });
+            
+            // Trigger Download File
+            let encodedUri = encodeURI(csvContent);
+            let link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Laporan_Audit_Logistik_${new Date().getTime()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         });
     </script>
 </body>
