@@ -156,7 +156,9 @@
                     throw new Error("Koneksi ditolak oleh Server n8n atau PIN Salah.");
                 }
 
-                let data = await response.json();
+                let rawText = await response.text();
+                console.log("Balasan Mentah Server:", rawText);
+                let data = JSON.parse(rawText);
 
                 if (data.status === "success") {
                     resultBox.style.display = 'block';
