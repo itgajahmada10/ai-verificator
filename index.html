@@ -8,12 +8,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
         :root {
-            /* Warna dibedakan dari Web Feeder agar lu tidak tertukar saat buka tab */
             --primary: #1F618D; 
             --primary-hover: #154360;
             --bg-body: #f4f6f9;
@@ -48,100 +46,34 @@
             border: 1px solid var(--border-color);
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .header h2 {
-            color: var(--primary);
-            margin: 0 0 8px 0;
-            font-size: 24px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .header p {
-            color: var(--text-muted);
-            margin: 0;
-            font-size: 14px;
-        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h2 { color: var(--primary); margin: 0 0 8px 0; font-size: 24px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .header p { color: var(--text-muted); margin: 0; font-size: 14px; }
 
         .form-group { margin-bottom: 20px; }
-        
-        label { 
-            display: block; 
-            font-weight: 600; 
-            margin-bottom: 8px; 
-            color: var(--text-main); 
-            font-size: 12px; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px; 
-        }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-main); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
         
         input[type="text"], input[type="password"], select, input[type="file"] { 
-            width: 100%; 
-            padding: 14px; 
-            border: 1px solid #ccc; 
-            border-radius: 8px; 
-            font-size: 14px; 
-            background-color: #fafafa; 
-            transition: all 0.2s ease;
+            width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 8px; 
+            font-size: 14px; background-color: #fafafa; transition: all 0.2s ease;
         }
 
-        input:focus, select:focus { 
-            border-color: var(--primary); 
-            outline: none; 
-            background-color: #fff; 
-            box-shadow: 0 0 0 3px rgba(31, 97, 141, 0.1); 
-        }
-
-        input[type="file"] {
-            padding: 10px;
-            background-color: #fff;
-            cursor: pointer;
-        }
+        input:focus, select:focus { border-color: var(--primary); outline: none; background-color: #fff; box-shadow: 0 0 0 3px rgba(31, 97, 141, 0.1); }
+        input[type="file"] { padding: 10px; background-color: #fff; cursor: pointer; }
 
         button { 
-            background-color: var(--primary); 
-            color: white; 
-            border: none; 
-            padding: 16px; 
-            width: 100%; 
-            font-size: 15px; 
-            font-weight: 700; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            transition: 0.3s; 
-            margin-top: 10px; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
+            background-color: var(--primary); color: white; border: none; padding: 16px; 
+            width: 100%; font-size: 15px; font-weight: 700; border-radius: 8px; cursor: pointer; 
+            transition: 0.3s; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 10px;
         }
 
         button:hover { background-color: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(31, 97, 141, 0.2); }
         button:disabled { background-color: #aeb6bf; cursor: not-allowed; transform: none; box-shadow: none; }
 
-        /* Output Box untuk Keputusan AI */
-        #resultBox {
-            margin-top: 25px;
-            padding: 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            line-height: 1.6;
-            display: none;
-            border-left: 5px solid var(--primary);
-            background-color: #f8f9fa;
-        }
-
+        #resultBox { margin-top: 25px; padding: 20px; border-radius: 8px; font-size: 14px; line-height: 1.6; display: none; border-left: 5px solid var(--success); background-color: #e9f7ef; color: var(--success); }
         .status-error { background-color: #fadbd8; border-left: 5px solid var(--error); color: var(--error); padding: 15px; border-radius: 8px; margin-top: 25px; display: none;}
-        
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid white; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -160,7 +92,7 @@
             </div>
 
             <div class="form-group">
-                <label>Nama Kapal (Kunci Pencarian DB)</label>
+                <label>Nama Kapal</label>
                 <input type="text" id="vesselName" placeholder="Contoh: MV. ASIAN WISDOM" required>
             </div>
 
@@ -179,7 +111,6 @@
             <div class="form-group">
                 <label>Dokumen Permintaan (Requisition / PO)</label>
                 <input type="file" id="reqFile" accept="application/pdf, .xlsx, .xls" required>
-                <small style="color: var(--text-muted); font-size: 11px; margin-top: 5px; display: block;">*Sistem akan otomatis mencari data Running Hours ke Database AppSheet.</small>
             </div>
 
             <button type="submit" id="submitBtn">
@@ -194,12 +125,7 @@
     <script>
         lucide.createIcons();
 
-        // GANTI INI DENGAN URL WEBHOOK N8N UNTUK AI VERIFICATOR LU
         const WEBHOOK_URL = "https://n8.waruna-group.co.id/webhook/277b56f1-5761-412a-9be5-86298d5aa5de";
-//Setelah diubah, flow antara frontend dan n8n webhook akan tersambung dengan benar. Apakah kamu ingin langsung update file-nya atau ada penyesuaian lain pada flow n8n-nya juga?
-
-
-Editing ai-verificat
 
         document.getElementById('auditForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -208,20 +134,15 @@ Editing ai-verificat
             const resultBox = document.getElementById('resultBox');
             const errorBox = document.getElementById('errorBox');
 
-            // Reset UI
             resultBox.style.display = 'none';
             errorBox.style.display = 'none';
             
-            // Build Payload
             const formData = new FormData();
             formData.append('auth_pin', document.getElementById('authPin').value);
             formData.append('vessel_name', document.getElementById('vesselName').value.toUpperCase());
             formData.append('engine_type', document.getElementById('engineType').value);
-            
-            // HANYA MENGIRIM 1 FILE SEKARANG
             formData.append('Requisition_Report', document.getElementById('reqFile').files[0]);
 
-            // Loading UI
             btn.disabled = true;
             btn.innerHTML = '<div class="loader"></div> Mengaudit Dokumen...';
 
@@ -237,10 +158,12 @@ Editing ai-verificat
 
                 let data = await response.json();
 
-                // Tampilkan Hasil Analisis AI
-                resultBox.style.display = 'block';
-                // Asumsi n8n merespon dengan JSON: { "status": "success", "ai_analysis": "..." }
-                resultBox.innerHTML = `<strong>Hasil Audit AI:</strong><br><br>${data.ai_analysis || "Audit selesai, namun tidak ada teks analisis yang dikembalikan oleh n8n."}`;
+                if (data.status === "success") {
+                    resultBox.style.display = 'block';
+                    resultBox.innerHTML = `<strong><i data-lucide="check-circle" style="vertical-align: middle; width:18px;"></i> Berhasil!</strong><br><br>${data.message}`;
+                } else {
+                    throw new Error(data.message || "Terjadi kesalahan sistem.");
+                }
 
             } catch (error) {
                 errorBox.style.display = 'block';
