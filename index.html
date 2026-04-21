@@ -121,11 +121,11 @@
                     <thead>
                         <tr>
                             <th>Item Name</th>
-                            <th>Part No.</th>
+                            <th>Part No. / Subsystem</th>
                             <th>Req Qty</th>
                             <th>ROB</th>
                             <th>Limit Hrs</th>
-                            <th>Target Cyl</th>
+                            <th>Target Cyl (Over Limit)</th>
                             <th>AI Recommendation</th>
                         </tr>
                     </thead>
@@ -244,14 +244,15 @@
                                 statusClass = "badge-kurang";
                             }
 
+                            // RENDER BARIS TABEL DENGAN FORMAT BARU
                             let tr = document.createElement('tr');
                             tr.innerHTML = `
                                 <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;" title="${item.Nama_Barang}">${item.Nama_Barang}</td>
-                                <td>${item.No_Part}</td>
+                                <td>${item.No_Part}<br><span style="font-size: 10px; color: #7f8c8d;">${item.Subsystem || "-"}</span></td>
                                 <td><strong>${item.Qty_Diminta}</strong></td>
                                 <td>${item.ROB}</td>
                                 <td>${item.Max_Limit_Jam}</td>
-                                <td>${item.Target_Cylinder}</td>
+                                <td><span style="color: #c0392b; font-weight: 600;">${item.Target_Cylinder}</span></td>
                                 <td><span class="badge ${statusClass}">${item.Rekomendasi_AI}</span></td>
                             `;
                             tableBody.appendChild(tr);
