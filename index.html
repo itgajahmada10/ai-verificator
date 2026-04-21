@@ -109,7 +109,7 @@
         <div class="report-column" id="reportPanel">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:2px solid #eee; padding-bottom:15px;">
                 <h3 style="margin:0; color:var(--primary); display:flex; align-items:center; gap:8px;">
-                    <i data-lucide="table"></i> Hasil Audit AI
+                    <i data-lucide="table"></i> Audit Results
                 </h3>
                 <div style="display: flex; gap: 10px;">
                     <button type="button" id="btnDownload" class="btn-download"><i data-lucide="download" style="width:14px;"></i> Download CSV</button>
@@ -120,13 +120,13 @@
                 <table id="auditTable">
                     <thead>
                         <tr>
-                            <th>Barang</th>
-                            <th>No Part</th>
-                            <th>Req</th>
+                            <th>Item Name</th>
+                            <th>Part No.</th>
+                            <th>Req Qty</th>
                             <th>ROB</th>
-                            <th>Limit</th>
+                            <th>Limit Hrs</th>
                             <th>Target Cyl</th>
-                            <th>Rekomendasi AI</th>
+                            <th>AI Recommendation</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody"></tbody>
@@ -145,10 +145,8 @@
             const btn = document.getElementById('submitBtn');
             let step = 0;
             
-            // Set pesan pertama
             btn.innerHTML = `<div class="loader"></div> ${progressMessages[step]}`;
             
-            // Ganti teks animasi setiap 3.5 detik
             let progressInterval = setInterval(() => {
                 step++;
                 if (step < progressMessages.length) {
@@ -163,7 +161,7 @@
                 if (!response.ok) throw new Error("Koneksi ditolak oleh Server n8n.");
                 return await response.json();
             } finally {
-                clearInterval(progressInterval); // Matikan timer kalau sudah dibalas n8n
+                clearInterval(progressInterval); 
             }
         }
 
@@ -195,12 +193,12 @@
             try {
                 let finalData = null;
 
-                // TIMELINE MESSAGES UNTUK BERBAGAI SKENARIO
+                // TIMELINE MESSAGES
                 const rhMsgs = ["[1/2] Mengirim Dokumen RH...", "[1/2] Mengekstrak data Excel...", "[1/2] Menulis ke Database...", "[1/2] Memvalidasi update..."];
                 const reqMsgs = ["Mengekstrak teks PDF...", "AI Menganalisa komponen...", "Mencocokkan aturan perusahaan...", "Menyiapkan tabel hasil..."];
                 const comboReqMsgs = ["[2/2] Mengekstrak teks PDF...", "[2/2] AI Menganalisa komponen...", "[2/2] Mencocokkan RH terbaru...", "[2/2] Menyiapkan tabel hasil..."];
 
-                // SKENARIO 1: COMBO (RH & REQ)
+                // SKENARIO 1: COMBO
                 if (rhFile && reqFile) {
                     let formRH = new FormData();
                     for (let pair of baseFormData.entries()) formRH.append(pair[0], pair[1]);
@@ -237,11 +235,12 @@
                         
                         finalData.audit_data.forEach(item => {
                             let statusClass = "badge-aman";
-                            let statusText = item.Rekomendasi_AI.toUpperCase();
+                            let statusText = item.Rekomendasi_AI ? item.Rekomendasi_AI.toUpperCase() : "";
                             
-                            if (statusText.includes("DIPANGKAS") || statusText.includes("TIDAK MATCH") || statusText.includes("KOSONG")) {
+                            // SENSOR WARNA LENCANA INGGRIS
+                            if (statusText.includes("REDUCED") || statusText.includes("UNMATCHED") || statusText.includes("NOT FOUND") || statusText.includes("NO RH DATA")) {
                                 statusClass = "badge-pangkas";
-                            } else if (statusText.includes("KURANG")) {
+                            } else if (statusText.includes("UNDER-ORDER")) {
                                 statusClass = "badge-kurang";
                             }
 
@@ -291,7 +290,7 @@
             let encodedUri = encodeURI(csvContent);
             let link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `Laporan_Audit_Logistik_${new Date().getTime()}.csv`);
+            link.setAttribute("download", `Audit_Logistics_Report_${new Date().getTime()}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
