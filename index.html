@@ -27,23 +27,43 @@
         
         body { 
             margin: 0; 
-            padding: 20px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
+            padding: 40px 20px; 
             background-color: var(--bg-body); 
             color: var(--text-main); 
         }
 
-        .card {
+        /* STRUKTUR DUA KOLOM */
+        .layout-wrapper {
+            display: flex;
+            gap: 25px;
+            max-width: 1500px;
+            margin: 0 auto;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        /* KOLOM KIRI (FORM) */
+        .form-column {
+            flex: 1 1 400px;
+            max-width: 450px;
             background-color: var(--bg-card);
-            width: 100%;
-            max-width: 500px;
             padding: 40px;
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.08);
             border: 1px solid var(--border-color);
+        }
+
+        /* KOLOM KANAN (LAPORAN) */
+        .report-column {
+            flex: 2 1 700px;
+            background-color: var(--bg-card);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border: 1px solid var(--border-color);
+            display: none; /* Disembunyikan sebelum ada hasil */
+            max-height: 85vh;
+            overflow-y: auto;
         }
 
         .header { text-align: center; margin-bottom: 30px; }
@@ -61,65 +81,72 @@
         input:focus, select:focus { border-color: var(--primary); outline: none; background-color: #fff; box-shadow: 0 0 0 3px rgba(31, 97, 141, 0.1); }
         input[type="file"] { padding: 10px; background-color: #fff; cursor: pointer; }
 
-        button { 
+        button.btn-submit { 
             background-color: var(--primary); color: white; border: none; padding: 16px; 
             width: 100%; font-size: 15px; font-weight: 700; border-radius: 8px; cursor: pointer; 
             transition: 0.3s; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 10px;
         }
-
-        button:hover { background-color: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(31, 97, 141, 0.2); }
-        button:disabled { background-color: #aeb6bf; cursor: not-allowed; transform: none; box-shadow: none; }
+        button.btn-submit:hover { background-color: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(31, 97, 141, 0.2); }
+        button.btn-submit:disabled { background-color: #aeb6bf; cursor: not-allowed; transform: none; box-shadow: none; }
 
         #resultBox { margin-top: 25px; padding: 20px; border-radius: 8px; font-size: 14px; line-height: 1.6; display: none; border-left: 5px solid var(--success); background-color: #e9f7ef; color: var(--success); }
         .status-error { background-color: #fadbd8; border-left: 5px solid var(--error); color: var(--error); padding: 15px; border-radius: 8px; margin-top: 25px; display: none;}
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid white; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
-        
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <div class="header">
-            <h2><i data-lucide="shield-check"></i> AI Verificator</h2>
-            <p>Sistem Audit Requisition Otomatis</p>
+    <div class="layout-wrapper">
+        <div class="form-column">
+            <div class="header">
+                <h2><i data-lucide="shield-check"></i> AI Verificator</h2>
+                <p>Sistem Audit Requisition Otomatis</p>
+            </div>
+            
+            <form id="auditForm">
+                <div class="form-group">
+                    <label>AUTH PIN</label>
+                    <input type="password" id="authPin" placeholder="Masukkan PIN Auditor" required>
+                </div>
+                <div class="form-group">
+                    <label>Nama Kapal</label>
+                    <input type="text" id="vesselName" placeholder="Contoh: MV. ASIAN WISDOM" required>
+                </div>
+                <div class="form-group">
+                    <label>Tipe Engine / Departemen</label>
+                    <select id="engineType" required>
+                        <option value="ME">Main Engine (ME)</option>
+                        <option value="AE 1">Auxiliary Engine 1 (AE 1)</option>
+                        <option value="AE 2">Auxiliary Engine 2 (AE 2)</option>
+                        <option value="AE 3">Auxiliary Engine 3 (AE 3)</option>
+                        <option value="DECK CRANE">Deck Crane</option>
+                        <option value="BOILER">Boiler</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Dokumen Permintaan (Requisition / PO)</label>
+                    <input type="file" id="reqFile" accept="application/pdf, .xlsx, .xls" required>
+                </div>
+                <button type="submit" id="submitBtn" class="btn-submit">
+                    <i data-lucide="cpu"></i> MULAI AUDIT DOKUMEN
+                </button>
+            </form>
+
+            <div id="resultBox"></div>
+            <div id="errorBox" class="status-error"></div>
         </div>
-        
-        <form id="auditForm">
-            <div class="form-group">
-                <label>AUTH PIN</label>
-                <input type="password" id="authPin" placeholder="Masukkan PIN Auditor" required>
+
+        <div class="report-column" id="reportPanel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; border-bottom:2px solid #eee; padding-bottom:15px;">
+                <h3 style="margin:0; color:var(--primary); display:flex; align-items:center; gap:8px;">
+                    <i data-lucide="file-bar-chart-2"></i> Laporan Audit AI
+                </h3>
+                <button type="button" onclick="document.getElementById('reportPanel').style.display='none'" style="background:#f4f6f9; border:1px solid #ccc; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:600; color:#555;">Tutup Panel</button>
             </div>
-
-            <div class="form-group">
-                <label>Nama Kapal</label>
-                <input type="text" id="vesselName" placeholder="Contoh: MV. ASIAN WISDOM" required>
-            </div>
-
-            <div class="form-group">
-                <label>Tipe Engine / Departemen</label>
-                <select id="engineType" required>
-                    <option value="ME">Main Engine (ME)</option>
-                    <option value="AE 1">Auxiliary Engine 1 (AE 1)</option>
-                    <option value="AE 2">Auxiliary Engine 2 (AE 2)</option>
-                    <option value="AE 3">Auxiliary Engine 3 (AE 3)</option>
-                    <option value="DECK CRANE">Deck Crane</option>
-                    <option value="BOILER">Boiler</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Dokumen Permintaan (Requisition / PO)</label>
-                <input type="file" id="reqFile" accept="application/pdf, .xlsx, .xls" required>
-            </div>
-
-            <button type="submit" id="submitBtn">
-                <i data-lucide="cpu"></i> MULAI AUDIT DOKUMEN
-            </button>
-        </form>
-
-        <div id="resultBox"></div>
-        <div id="errorBox" class="status-error"></div>
+            
+            <div id="reportContent" style="width: 100%; overflow-x: auto;"></div>
+        </div>
     </div>
 
     <script>
@@ -133,9 +160,12 @@
             const btn = document.getElementById('submitBtn');
             const resultBox = document.getElementById('resultBox');
             const errorBox = document.getElementById('errorBox');
+            const reportPanel = document.getElementById('reportPanel');
+            const reportContent = document.getElementById('reportContent');
 
             resultBox.style.display = 'none';
             errorBox.style.display = 'none';
+            reportPanel.style.display = 'none';
             
             const formData = new FormData();
             formData.append('auth_pin', document.getElementById('authPin').value);
@@ -152,17 +182,20 @@
                     body: formData 
                 });
 
-                if (!response.ok) {
-                    throw new Error("Koneksi ditolak oleh Server n8n atau PIN Salah.");
-                }
+                if (!response.ok) throw new Error("Koneksi ditolak oleh Server n8n atau PIN Salah.");
 
                 let rawText = await response.text();
-                console.log("Balasan Mentah Server:", rawText);
                 let data = JSON.parse(rawText);
 
                 if (data.status === "success") {
                     resultBox.style.display = 'block';
                     resultBox.innerHTML = `<strong><i data-lucide="check-circle" style="vertical-align: middle; width:18px;"></i> Berhasil!</strong><br><br>${data.message}`;
+                    
+                    // JIKA ADA DATA HTML DARI N8N, TAMPILKAN PANEL KANAN
+                    if (data.html_report) {
+                        reportPanel.style.display = 'block';
+                        reportContent.innerHTML = data.html_report;
+                    }
                 } else {
                     throw new Error(data.message || "Terjadi kesalahan sistem.");
                 }
