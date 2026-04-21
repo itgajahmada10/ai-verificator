@@ -56,6 +56,7 @@
         .badge-aman { background-color: #e9f7ef; color: #1e8449; border: 1px solid #a3e4d7; }
         .badge-pangkas { background-color: #fadbd8; color: #cb4335; border: 1px solid #f5b7b1; }
         .badge-kurang { background-color: #fcf3cf; color: #d4ac0d; border: 1px solid #f9e79f; }
+        .badge-alias { font-size: 10px; color: #d35400; font-weight: 700; background: #fdebd0; padding: 3px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; border: 1px solid #f5cba7; }
 
         .btn-download { background-color: #27ae60; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s;}
         .btn-download:hover { background-color: #1e8449; }
@@ -77,7 +78,7 @@
                 <div class="form-group" style="display: flex; gap: 15px;">
                     <div style="flex: 1;">
                         <label>Nama Kapal</label>
-                        <input type="text" id="vesselName" placeholder="Contoh: MV. ASIAN WISDOM" required>
+                        <input type="text" id="vesselName" placeholder="Contoh: LPG/C GAS LAURA" required>
                     </div>
                     <div style="flex: 1;">
                         <label>Tipe Mesin</label>
@@ -86,7 +87,6 @@
                             <option value="AE 1">AE 1</option>
                             <option value="AE 2">AE 2</option>
                             <option value="AE 3">AE 3</option>
-                            <option value="DECK CRANE">CRANE</option>
                         </select>
                     </div>
                 </div>
@@ -140,11 +140,9 @@
         const WEBHOOK_URL = "https://n8.waruna-group.co.id/webhook/277b56f1-5761-412a-9be5-86298d5aa5de";
         let currentAuditData = [];
 
-        // FUNGSI KOMUNIKASI KE N8N + PROGRESS TIMELINE
         async function sendToN8n(payloadData, progressMessages) {
             const btn = document.getElementById('submitBtn');
             let step = 0;
-            
             btn.innerHTML = `<div class="loader"></div> ${progressMessages[step]}`;
             
             let progressInterval = setInterval(() => {
@@ -177,9 +175,7 @@
             const reqFile = document.getElementById('reqFile').files[0];
             
             if (!rhFile && !reqFile) {
-                errorBox.style.display = 'block';
-                errorBox.innerHTML = `Mohon unggah minimal 1 dokumen.`;
-                return;
+                errorBox.style.display = 'block'; errorBox.innerHTML = `Mohon unggah minimal 1 dokumen.`; return;
             }
 
             resultBox.style.display = 'none'; errorBox.style.display = 'none'; reportPanel.style.display = 'none'; tableBody.innerHTML = '';
@@ -189,16 +185,13 @@
             baseFormData.append('auth_pin', document.getElementById('authPin').value);
             baseFormData.append('vessel_name', document.getElementById('vesselName').value.toUpperCase());
             baseFormData.append('engine_type', document.getElementById('engineType').value);
+            baseFormData.append('job_id', `JOB-${Date.now()}`);
 
             try {
                 let finalData = null;
+                const rhMsgs = ["[1/2] Updating RH Database...", "[1/2] Extracting Excel data...", "[1/2] Syncing with Sheets..."];
+                const comboReqMsgs = ["[2/2] Analyzing Requisition...", "[2/2] AI Cross-checking RH...", "[2/2] Applying SOP Rules..."];
 
-                // TIMELINE MESSAGES
-                const rhMsgs = ["[1/2] Mengirim Dokumen RH...", "[1/2] Mengekstrak data Excel...", "[1/2] Menulis ke Database...", "[1/2] Memvalidasi update..."];
-                const reqMsgs = ["Mengekstrak teks PDF...", "AI Menganalisa komponen...", "Mencocokkan aturan perusahaan...", "Menyiapkan tabel hasil..."];
-                const comboReqMsgs = ["[2/2] Mengekstrak teks PDF...", "[2/2] AI Menganalisa komponen...", "[2/2] Mencocokkan RH terbaru...", "[2/2] Menyiapkan tabel hasil..."];
-
-                // SKENARIO 1: COMBO
                 if (rhFile && reqFile) {
                     let formRH = new FormData();
                     for (let pair of baseFormData.entries()) formRH.append(pair[0], pair[1]);
@@ -210,44 +203,43 @@
                     formReq.append('Requisition_Report', reqFile);
                     finalData = await sendToN8n(formReq, comboReqMsgs);
                 } 
-                // SKENARIO 2: HANYA RH
                 else if (rhFile) {
                     let formRH = new FormData();
                     for (let pair of baseFormData.entries()) formRH.append(pair[0], pair[1]);
                     formRH.append('RH_Report', rhFile);
-                    finalData = await sendToN8n(formRH, ["Mengirim Dokumen RH...", "Mengekstrak data Excel...", "Menulis ke Database..."]);
+                    finalData = await sendToN8n(formRH, ["Updating RH Data...", "Processing file..."]);
                 }
-                // SKENARIO 3: HANYA REQ
-                else if (reqFile) {
+                else {
                     let formReq = new FormData();
                     for (let pair of baseFormData.entries()) formReq.append(pair[0], pair[1]);
                     formReq.append('Requisition_Report', reqFile);
-                    finalData = await sendToN8n(formReq, reqMsgs);
+                    finalData = await sendToN8n(formReq, ["AI Analyzing Requisition...", "Matching with Mandatory...", "Calculating limits..."]);
                 }
 
-                // RENDER HASIL
                 if (finalData && finalData.status === "success") {
                     resultBox.style.display = 'block';
-                    resultBox.innerHTML = `<strong>Berhasil!</strong><br>${finalData.message}`;
+                    resultBox.innerHTML = `<strong>Success!</strong><br>${finalData.message}`;
                     
-                    if (finalData.audit_data && Array.isArray(finalData.audit_data) && finalData.audit_data.length > 0) {
+                    if (finalData.audit_data && Array.isArray(finalData.audit_data)) {
                         currentAuditData = finalData.audit_data;
-                        
                         finalData.audit_data.forEach(item => {
                             let statusClass = "badge-aman";
                             let statusText = item.Rekomendasi_AI ? item.Rekomendasi_AI.toUpperCase() : "";
                             
-                            // SENSOR WARNA LENCANA INGGRIS
                             if (statusText.includes("REDUCED") || statusText.includes("UNMATCHED") || statusText.includes("NOT FOUND") || statusText.includes("NO RH DATA")) {
                                 statusClass = "badge-pangkas";
                             } else if (statusText.includes("UNDER-ORDER")) {
                                 statusClass = "badge-kurang";
                             }
 
-                            // RENDER BARIS TABEL DENGAN FORMAT BARU
+                            let itemNameHtml = `<td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;" title="${item.Nama_Barang}">${item.Nama_Barang}</td>`;
+                            if (item.Tipe_Match === "ALIAS") {
+                                itemNameHtml = `<td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;" title="${item.Nama_Barang}">${item.Nama_Barang}<br><span class="badge-alias"><i data-lucide="link" style="width:10px;height:10px;"></i> MAPPED: ${item.Nama_Master}</span></td>`;
+                            }
+
                             let tr = document.createElement('tr');
                             tr.innerHTML = `
-                                <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;" title="${item.Nama_Barang}">${item.Nama_Barang}</td>
+                                ${itemNameHtml}
                                 <td>${item.No_Part}<br><span style="font-size: 10px; color: #7f8c8d;">${item.Subsystem || "-"}</span></td>
                                 <td><strong>${item.Qty_Diminta}</strong></td>
                                 <td>${item.ROB}</td>
@@ -259,39 +251,27 @@
                         });
                         reportPanel.style.display = 'block';
                     }
-                } else {
-                    throw new Error(finalData.message || "Terjadi kesalahan sistem.");
                 }
             } catch (error) {
-                errorBox.style.display = 'block';
-                errorBox.innerHTML = error.message;
+                errorBox.style.display = 'block'; errorBox.innerHTML = error.message;
             } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i data-lucide="send"></i> PROSES DATA SEKARANG';
+                btn.disabled = false; btn.innerHTML = '<i data-lucide="send"></i> PROSES DATA SEKARANG';
                 if (typeof lucide !== 'undefined') { lucide.createIcons(); }
             }
         });
 
-        // FUNGSI DOWNLOAD CSV
         document.getElementById('btnDownload').addEventListener('click', function() {
             if (currentAuditData.length === 0) return;
-            
             let csvContent = "data:text/csv;charset=utf-8,";
             let headers = Object.keys(currentAuditData[0]).join(",");
             csvContent += headers + "\r\n";
-            
             currentAuditData.forEach(function(rowObj) {
-                let row = Object.values(rowObj).map(val => {
-                    let strVal = String(val).replace(/"/g, '""');
-                    return `"${strVal}"`;
-                }).join(",");
+                let row = Object.values(rowObj).map(val => `"${String(val).replace(/"/g, '""')}"`).join(",");
                 csvContent += row + "\r\n";
             });
-            
-            let encodedUri = encodeURI(csvContent);
             let link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `Audit_Logistics_Report_${new Date().getTime()}.csv`);
+            link.setAttribute("href", encodeURI(csvContent));
+            link.setAttribute("download", `Audit_Report_${new Date().getTime()}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
