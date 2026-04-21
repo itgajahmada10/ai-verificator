@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Verificator — Logistics Audit</title>
+    <title>AI Verificator — Unified Logistics Portal</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,6 +21,8 @@
             --text-muted: #666;
             --success: #1e8449;
             --error: #cb4335;
+            --accent-rh: #e8f8f5;
+            --accent-req: #fef9e7;
         }
 
         * { box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
@@ -44,8 +46,8 @@
 
         /* KOLOM KIRI (FORM) */
         .form-column {
-            flex: 1 1 400px;
-            max-width: 450px;
+            flex: 1 1 450px;
+            max-width: 500px;
             background-color: var(--bg-card);
             padding: 40px;
             border-radius: 16px;
@@ -61,7 +63,7 @@
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.08);
             border: 1px solid var(--border-color);
-            display: none; /* Disembunyikan sebelum ada hasil */
+            display: none; 
             max-height: 85vh;
             overflow-y: auto;
         }
@@ -73,13 +75,25 @@
         .form-group { margin-bottom: 20px; }
         label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-main); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        input[type="text"], input[type="password"], select, input[type="file"] { 
+        input[type="text"], input[type="password"], select { 
             width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 8px; 
             font-size: 14px; background-color: #fafafa; transition: all 0.2s ease;
         }
 
         input:focus, select:focus { border-color: var(--primary); outline: none; background-color: #fff; box-shadow: 0 0 0 3px rgba(31, 97, 141, 0.1); }
-        input[type="file"] { padding: 10px; background-color: #fff; cursor: pointer; }
+        
+        .upload-section {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px dashed var(--primary);
+        }
+        
+        .upload-section.rh { background-color: var(--accent-rh); border-color: #a3e4d7; }
+        .upload-section.req { background-color: var(--accent-req); border-color: #f9e79f; }
+        
+        .upload-section label { color: var(--primary); display: flex; align-items: center; gap: 5px; margin-bottom: 10px;}
+        input[type="file"] { width: 100%; padding: 10px; background-color: #fff; border-radius: 6px; border: 1px solid #ccc; cursor: pointer; font-size: 13px;}
 
         button.btn-submit { 
             background-color: var(--primary); color: white; border: none; padding: 16px; 
@@ -100,36 +114,47 @@
     <div class="layout-wrapper">
         <div class="form-column">
             <div class="header">
-                <h2><i data-lucide="shield-check"></i> AI Verificator</h2>
-                <p>Sistem Audit Requisition Otomatis</p>
+                <h2><i data-lucide="shield-check"></i> SPB Logistics Portal</h2>
+                <p>Sistem Terpusat Update RH & Audit Permintaan</p>
             </div>
             
             <form id="auditForm">
                 <div class="form-group">
                     <label>AUTH PIN</label>
-                    <input type="password" id="authPin" placeholder="Masukkan PIN Auditor" required>
+                    <input type="password" id="authPin" placeholder="Masukkan PIN SPB" required>
                 </div>
-                <div class="form-group">
-                    <label>Nama Kapal</label>
-                    <input type="text" id="vesselName" placeholder="Contoh: MV. ASIAN WISDOM" required>
+                
+                <div class="form-group" style="display: flex; gap: 15px;">
+                    <div style="flex: 1;">
+                        <label>Nama Kapal</label>
+                        <input type="text" id="vesselName" placeholder="Contoh: MV. ASIAN WISDOM" required>
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Tipe Mesin</label>
+                        <select id="engineType" required>
+                            <option value="ME">ME</option>
+                            <option value="AE 1">AE 1</option>
+                            <option value="AE 2">AE 2</option>
+                            <option value="AE 3">AE 3</option>
+                            <option value="DECK CRANE">CRANE</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Tipe Engine / Departemen</label>
-                    <select id="engineType" required>
-                        <option value="ME">Main Engine (ME)</option>
-                        <option value="AE 1">Auxiliary Engine 1 (AE 1)</option>
-                        <option value="AE 2">Auxiliary Engine 2 (AE 2)</option>
-                        <option value="AE 3">Auxiliary Engine 3 (AE 3)</option>
-                        <option value="DECK CRANE">Deck Crane</option>
-                        <option value="BOILER">Boiler</option>
-                    </select>
+
+                <div class="upload-section rh">
+                    <label><i data-lucide="clock" style="width: 16px;"></i> OPSI 1: Update Laporan Jam Kerja (RH)</label>
+                    <input type="file" id="rhFile" accept="application/pdf, .xlsx, .xls">
+                    <small style="color: #555; font-size: 11px; margin-top: 5px; display: block;">*Boleh dikosongkan jika hanya ingin mengaudit permintaan.</small>
                 </div>
-                <div class="form-group">
-                    <label>Dokumen Permintaan (Requisition / PO)</label>
-                    <input type="file" id="reqFile" accept="application/pdf, .xlsx, .xls" required>
+
+                <div class="upload-section req">
+                    <label><i data-lucide="file-text" style="width: 16px;"></i> OPSI 2: Audit Permintaan Barang (Req/PO)</label>
+                    <input type="file" id="reqFile" accept="application/pdf, .xlsx, .xls">
+                    <small style="color: #555; font-size: 11px; margin-top: 5px; display: block;">*Boleh dikosongkan jika hanya ingin update RH bulanan.</small>
                 </div>
+
                 <button type="submit" id="submitBtn" class="btn-submit">
-                    <i data-lucide="cpu"></i> MULAI AUDIT DOKUMEN
+                    <i data-lucide="send"></i> PROSES DATA SEKARANG
                 </button>
             </form>
 
@@ -140,11 +165,10 @@
         <div class="report-column" id="reportPanel">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; border-bottom:2px solid #eee; padding-bottom:15px;">
                 <h3 style="margin:0; color:var(--primary); display:flex; align-items:center; gap:8px;">
-                    <i data-lucide="file-bar-chart-2"></i> Laporan Audit AI
+                    <i data-lucide="file-bar-chart-2"></i> Hasil Eksekusi Sistem
                 </h3>
                 <button type="button" onclick="document.getElementById('reportPanel').style.display='none'" style="background:#f4f6f9; border:1px solid #ccc; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:600; color:#555;">Tutup Panel</button>
             </div>
-            
             <div id="reportContent" style="width: 100%; overflow-x: auto;"></div>
         </div>
     </div>
@@ -152,6 +176,7 @@
     <script>
         if (typeof lucide !== 'undefined') { lucide.createIcons(); }
 
+        // URL WEBHOOK N8N LU TETAP SAMA
         const WEBHOOK_URL = "https://n8.waruna-group.co.id/webhook/277b56f1-5761-412a-9be5-86298d5aa5de";
 
         document.getElementById('auditForm').addEventListener('submit', async function(e) {
@@ -163,6 +188,17 @@
             const reportPanel = document.getElementById('reportPanel');
             const reportContent = document.getElementById('reportContent');
 
+            // Validasi: Harus isi minimal salah satu file
+            const rhFile = document.getElementById('rhFile').files[0];
+            const reqFile = document.getElementById('reqFile').files[0];
+            
+            if (!rhFile && !reqFile) {
+                errorBox.style.display = 'block';
+                errorBox.innerHTML = `<i data-lucide="alert-triangle" style="vertical-align: middle;"></i> Mohon unggah minimal Laporan RH atau Dokumen Permintaan.`;
+                if (typeof lucide !== 'undefined') { lucide.createIcons(); }
+                return;
+            }
+
             resultBox.style.display = 'none';
             errorBox.style.display = 'none';
             reportPanel.style.display = 'none';
@@ -171,10 +207,13 @@
             formData.append('auth_pin', document.getElementById('authPin').value);
             formData.append('vessel_name', document.getElementById('vesselName').value.toUpperCase());
             formData.append('engine_type', document.getElementById('engineType').value);
-            formData.append('Requisition_Report', document.getElementById('reqFile').files[0]);
+            
+            // Append file hanya jika ada isinya
+            if (rhFile) formData.append('RH_Report', rhFile);
+            if (reqFile) formData.append('Requisition_Report', reqFile);
 
             btn.disabled = true;
-            btn.innerHTML = '<div class="loader"></div> Mengaudit Dokumen...';
+            btn.innerHTML = '<div class="loader"></div> Mengirim & Memproses Data...';
 
             try {
                 let response = await fetch(WEBHOOK_URL, { 
@@ -191,7 +230,6 @@
                     resultBox.style.display = 'block';
                     resultBox.innerHTML = `<strong><i data-lucide="check-circle" style="vertical-align: middle; width:18px;"></i> Berhasil!</strong><br><br>${data.message}`;
                     
-                    // JIKA ADA DATA HTML DARI N8N, TAMPILKAN PANEL KANAN
                     if (data.html_report) {
                         reportPanel.style.display = 'block';
                         reportContent.innerHTML = data.html_report;
@@ -205,7 +243,7 @@
                 errorBox.innerHTML = `<i data-lucide="alert-triangle" style="vertical-align: middle;"></i> ${error.message}`;
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i data-lucide="cpu"></i> MULAI AUDIT DOKUMEN';
+                btn.innerHTML = '<i data-lucide="send"></i> PROSES DATA SEKARANG';
                 if (typeof lucide !== 'undefined') { lucide.createIcons(); }
             }
         });
