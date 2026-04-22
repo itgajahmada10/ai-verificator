@@ -122,7 +122,7 @@
                         <tr>
                             <th>Item Name</th>
                             <th>Part No. / Subsystem</th>
-                            <th>Req Qty</th>
+                            <th>SPB Appr Qty</th>
                             <th>ROB</th>
                             <th>Limit Hrs</th>
                             <th>Target Cyl (Over Limit)</th>
@@ -223,20 +223,44 @@
                     if (finalData.audit_data && Array.isArray(finalData.audit_data)) {
                         currentAuditData = finalData.audit_data;
                         finalData.audit_data.forEach(item => {
-                            let statusClass = "badge-aman";
-                            let statusText = item.Rekomendasi_AI ? item.Rekomendasi_AI.toUpperCase() : "";
                             
-                            if (statusText.includes("REDUCED") || statusText.includes("UNMATCHED") || statusText.includes("NOT FOUND") || statusText.includes("NO RH DATA")) {
-                                statusClass = "badge-pangkas";
-                            } else if (statusText.includes("UNDER-ORDER")) {
-                                statusClass = "badge-kurang";
-                            }
-
-                            let itemNameHtml = `<td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;" title="${item.Nama_Barang}">${item.Nama_Barang}</td>`;
+                            // 1. RENDER ITEM NAME + SEQUENCE NUMBER
+                            let itemNameHtml = `
+                                <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;" title="${item.Nama_Barang}">
+                                    <span style="color: #7f8c8d; font-size: 10px; font-weight: bold;">#${item.No_Item_PDF || "-"}</span><br>
+                                    ${item.Nama_Barang}
+                                </td>`;
                             if (item.Tipe_Match === "ALIAS") {
-                                itemNameHtml = `<td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;" title="${item.Nama_Barang}">${item.Nama_Barang}<br><span class="badge-alias"><i data-lucide="link" style="width:10px;height:10px;"></i> MAPPED: ${item.Nama_Master}</span></td>`;
+                                itemNameHtml = `
+                                <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;" title="${item.Nama_Barang}">
+                                    <span style="color: #7f8c8d; font-size: 10px; font-weight: bold;">#${item.No_Item_PDF || "-"}</span><br>
+                                    ${item.Nama_Barang}<br>
+                                    <span class="badge-alias"><i data-lucide="link" style="width:10px;height:10px;"></i> MAPPED: ${item.Nama_Master}</span>
+                                </td>`;
                             }
 
+                            // 2. RENDER AI RECOMMENDATION LOGIC
+                            let aiRecHtml = "";
+                            if (item.AI_Status === "NON-CRITICAL") {
+                                aiRecHtml = `<span style="color:#7f8c8d; font-size: 11px; font-weight:600;">- NON CRITICAL -</span>`;
+                            } else {
+                                let statusClass = "badge-aman";
+                                if (item.AI_Status === "REDUCED") statusClass = "badge-pangkas";
+                                else if (item.AI_Status === "UNDER-ORDER") statusClass = "badge-kurang";
+
+                                let warningHtml = item.Warning_Text ? `<div style="color:#c0392b; font-weight:bold; font-size:10px; margin-bottom:4px;">${item.Warning_Text}</div>` : "";
+                                let bulletPoints = item.Rekomendasi_AI.split("|").map(b => `<li style="margin-bottom:3px;">${b.trim()}</li>`).join("");
+                                
+                                aiRecHtml = `
+                                    ${warningHtml}
+                                    <span class="badge ${statusClass}" style="margin-bottom:8px; display:inline-block;">${item.AI_Status}</span>
+                                    <ul style="margin: 0; padding-left: 15px; font-size: 11px; color: #444;">
+                                        ${bulletPoints}
+                                    </ul>
+                                `;
+                            }
+
+                            // 3. RENDER TABLE ROW
                             let tr = document.createElement('tr');
                             tr.innerHTML = `
                                 ${itemNameHtml}
@@ -245,7 +269,7 @@
                                 <td>${item.ROB}</td>
                                 <td>${item.Max_Limit_Jam}</td>
                                 <td><span style="color: #c0392b; font-weight: 600;">${item.Target_Cylinder}</span></td>
-                                <td><span class="badge ${statusClass}">${item.Rekomendasi_AI}</span></td>
+                                <td>${aiRecHtml}</td>
                             `;
                             tableBody.appendChild(tr);
                         });
