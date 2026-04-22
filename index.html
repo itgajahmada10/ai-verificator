@@ -6,112 +6,64 @@
     <title>AI Verificator — Unified Logistics Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
 
     <style>
         :root {
-            /* Tema Warna Baru Sesuai Screenshot (Deep Purple & Soft Cream) */
-            --primary: #4e2b5c; 
-            --primary-hover: #3b1e47; 
-            --bg-card: #ffffff;
-            --border-color: #e8dee8; 
-            --text-main: #333333; 
-            --text-muted: #666666;
-            --success: #27ae60; 
-            --error: #c0392b; 
-            --warning: #d35400;
-            --accent-rh: #f4f0f5; 
-            --accent-req: #fffaf0;
+            --primary: #4e2b5c; --primary-hover: #3b1e47; --bg-card: #ffffff;
+            --border-color: #e8dee8; --text-main: #333333; --text-muted: #666666;
+            --success: #27ae60; --error: #c0392b; --accent-rh: #f4f0f5; --accent-req: #fffaf0;
         }
-        
         * { box-sizing: border-box; }
-        
         body { 
-            margin: 0; 
-            padding: 40px 20px; 
-            /* Gradasi hangat seperti di referensi gambar */
+            margin: 0; padding: 40px 20px; 
             background: linear-gradient(135deg, #fffdf2 0%, #ffe9d6 100%);
-            color: var(--text-main); 
-            font-family: 'Inter', sans-serif;
-            min-height: 100vh;
+            color: var(--text-main); font-family: 'Inter', sans-serif; min-height: 100vh;
         }
-        
         .layout-wrapper { display: flex; gap: 25px; max-width: 1600px; margin: 0 auto; align-items: flex-start; flex-wrap: wrap; }
-        
         .form-column { 
-            flex: 1 1 400px; max-width: 450px; background-color: var(--bg-card); 
-            padding: 35px; border-radius: 16px; 
-            box-shadow: 0 12px 40px rgba(78, 43, 92, 0.08); 
-            border: 1px solid var(--border-color); 
+            flex: 1 1 400px; max-width: 420px; background-color: var(--bg-card); 
+            padding: 35px; border-radius: 16px; box-shadow: 0 12px 40px rgba(78, 43, 92, 0.08); border: 1px solid var(--border-color); 
         }
-        
         .report-column { 
-            flex: 2 1 800px; background-color: var(--bg-card); 
-            padding: 30px; border-radius: 16px; 
-            box-shadow: 0 12px 40px rgba(78, 43, 92, 0.08); 
-            border: 1px solid var(--border-color); display: none; 
+            flex: 2 1 800px; background-color: var(--bg-card); padding: 30px; border-radius: 16px; 
+            box-shadow: 0 12px 40px rgba(78, 43, 92, 0.08); border: 1px solid var(--border-color); display: none; 
         }
-        
         .header { text-align: center; margin-bottom: 25px; }
-        .header h2 { 
-            color: var(--primary); margin: 0 0 8px 0; font-size: 22px; 
-            font-family: 'Poppins', sans-serif; font-weight: 700; 
-            display: flex; align-items: center; justify-content: center; gap: 10px; 
-        }
-        .header p { color: var(--text-muted); margin: 0; font-size: 13px; font-weight: 500;}
-
-        .form-group { margin-bottom: 15px; }
-        label { 
-            display: block; font-weight: 600; margin-bottom: 6px; 
-            color: var(--text-main); font-size: 11px; text-transform: uppercase; 
-            letter-spacing: 0.5px; font-family: 'Poppins', sans-serif;
-        }
-        input[type="text"], input[type="password"], select { 
-            width: 100%; padding: 12px; border: 1px solid #ccc; 
-            border-radius: 8px; font-size: 13px; background-color: #fafafa; 
-            font-family: 'Inter', sans-serif;
-        }
-        input:focus, select:focus { border-color: var(--primary); outline: none; background-color: #fff; box-shadow: 0 0 0 3px rgba(78, 43, 92, 0.1);}
-        
+        .header h2 { color: var(--primary); margin: 0 0 8px 0; font-size: 22px; font-family: 'Poppins', sans-serif; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .header p { color: var(--text-muted); margin: 0; font-size: 13px; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-weight: 600; margin-bottom: 6px; color: var(--text-main); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Poppins', sans-serif; }
+        select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 13px; background-color: #fafafa; }
         .upload-section { padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed #b59ebc; }
         .upload-section.rh { background-color: var(--accent-rh); }
         .upload-section.req { background-color: var(--accent-req); border-color: #eeddb0; }
         .upload-section label { color: var(--primary); display: flex; align-items: center; gap: 6px; margin-bottom: 8px; font-size: 12px;}
         input[type="file"] { width: 100%; padding: 8px; background-color: #fff; border-radius: 6px; border: 1px solid #ccc; cursor: pointer; font-size: 12px;}
-
         button.btn-submit { 
-            background-color: var(--primary); color: white; border: none; 
-            padding: 15px; width: 100%; font-size: 14px; font-family: 'Poppins', sans-serif; 
-            font-weight: 600; border-radius: 8px; cursor: pointer; transition: 0.3s; 
+            background-color: var(--primary); color: white; border: none; padding: 15px; width: 100%; font-size: 14px; 
+            font-family: 'Poppins', sans-serif; font-weight: 600; border-radius: 8px; cursor: pointer; transition: 0.3s; 
             display: flex; justify-content: center; align-items: center; gap: 10px; 
         }
-        button.btn-submit:hover { background-color: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(78, 43, 92, 0.2);}
-        button.btn-submit:disabled { background-color: #a395a8; cursor: not-allowed; transform: none; box-shadow: none;}
-
+        button.btn-submit:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
+        button.btn-submit:disabled { background-color: #a395a8; cursor: not-allowed; }
         #resultBox { margin-top: 20px; padding: 15px; border-radius: 8px; font-size: 13px; display: none; border-left: 5px solid var(--success); background-color: #e9f7ef; color: var(--success); }
         .status-error { background-color: #fadbd8; border-left: 5px solid var(--error); color: var(--error); padding: 15px; border-radius: 8px; margin-top: 20px; font-size: 13px; display: none;}
         .loader { border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid white; border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* TABEL STYLE */
         .table-responsive { width: 100%; overflow-x: auto; margin-top: 15px; border-radius: 8px; border: 1px solid var(--border-color); }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
         th { background-color: #fbf9fc; padding: 14px 12px; text-align: left; font-weight: 600; color: var(--primary); border-bottom: 2px solid var(--border-color); font-family: 'Poppins', sans-serif;}
         td { padding: 12px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
-        tr:hover { background-color: #faf9fb; }
-        
         .subsystem-header { background-color: #f0ebf2 !important; font-weight: 600; color: var(--primary); font-size: 13px; padding: 10px 15px !important; border-top: 2px solid #d2c5d6; font-family: 'Poppins', sans-serif;}
-        .subsystem-header:hover { background-color: #f0ebf2 !important; }
-        
         .badge { padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
         .badge-aman { background-color: #e9f7ef; color: #1e8449; border: 1px solid #a3e4d7; }
         .badge-pangkas { background-color: #fadbd8; color: #cb4335; border: 1px solid #f5b7b1; }
         .badge-kurang { background-color: #fcf3cf; color: #d4ac0d; border: 1px solid #f9e79f; }
         .badge-alias { font-size: 10px; color: #d35400; font-weight: 700; background: #fdebd0; padding: 3px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; border: 1px solid #f5cba7; }
         .badge-type-mandatory { font-size: 9px; background: #f0ebf2; color: var(--primary); padding: 2px 5px; border-radius: 3px; border: 1px solid #d2c5d6; font-weight: 700; display: inline-block; margin-top: 4px;}
-        .badge-type-consumable { font-size: 9px; background: #f2f4f4; color: #7f8c8d; padding: 2px 5px; border-radius: 3px; border: 1px solid #d5dbdb; font-weight: 700; display: inline-block; margin-top: 4px;}
-
         .btn-download { background-color: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s;}
-        .btn-download:hover { background-color: var(--primary-hover); }
     </style>
 </head>
 <body>
@@ -120,38 +72,28 @@
         <div class="form-column">
             <div class="header">
                 <h2><i data-lucide="shield-check"></i> SPB Logistics Portal</h2>
-                <p>Centralized RH Update & Requisition Audit</p>
+                <p>Auto-Vessel Detection & Audit System</p>
             </div>
             <form id="auditForm">
                 <div class="form-group">
-                    <label>AUTH PIN</label>
-                    <input type="password" id="authPin" placeholder="Enter SPB PIN" required>
-                </div>
-                <div class="form-group" style="display: flex; gap: 15px;">
-                    <div style="flex: 1;">
-                        <label>Vessel Name</label>
-                        <input type="text" id="vesselName" placeholder="E.g., LPG/C GAS LAURA" required>
-                    </div>
-                    <div style="flex: 1;">
-                        <label>Engine Type</label>
-                        <select id="engineType" required>
-                            <option value="ME">Main Engine (ME)</option>
-                            <option value="AE 1">Aux Engine 1 (AE 1)</option>
-                            <option value="AE 2">Aux Engine 2 (AE 2)</option>
-                            <option value="AE 3">Aux Engine 3 (AE 3)</option>
-                        </select>
-                    </div>
+                    <label>Engine Type Selection</label>
+                    <select id="engineType" required>
+                        <option value="ME">Main Engine (ME)</option>
+                        <option value="AE 1">Aux Engine 1 (AE 1)</option>
+                        <option value="AE 2">Aux Engine 2 (AE 2)</option>
+                        <option value="AE 3">Aux Engine 3 (AE 3)</option>
+                    </select>
                 </div>
                 <div class="upload-section rh">
-                    <label><i data-lucide="clock"></i> OPTION 1: Update Running Hours (RH)</label>
+                    <label><i data-lucide="clock"></i> 1. Running Hours (RH) Report</label>
                     <input type="file" id="rhFile" accept="application/pdf, .xlsx, .xls">
                 </div>
                 <div class="upload-section req">
-                    <label><i data-lucide="file-text"></i> OPTION 2: Audit Requisition (Req/PO)</label>
+                    <label><i data-lucide="file-text"></i> 2. Requisition / PO PDF</label>
                     <input type="file" id="reqFile" accept="application/pdf, .xlsx, .xls">
                 </div>
                 <button type="submit" id="submitBtn" class="btn-submit">
-                    <i data-lucide="send"></i> PROCESS DATA NOW
+                    <i data-lucide="send"></i> START AUDIT PROCESS
                 </button>
             </form>
             <div id="resultBox"></div>
@@ -160,12 +102,12 @@
 
         <div class="report-column" id="reportPanel">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:2px solid var(--border-color); padding-bottom:15px;">
-                <h3 style="margin:0; color:var(--primary); display:flex; align-items:center; gap:8px; font-family:'Poppins', sans-serif;">
+                <h3 id="reportTitle" style="margin:0; color:var(--primary); font-family:'Poppins', sans-serif;">
                     <i data-lucide="table"></i> Audit Results
                 </h3>
                 <div style="display: flex; gap: 10px;">
-                    <button type="button" id="btnDownload" class="btn-download"><i data-lucide="download" style="width:14px;"></i> Download CSV</button>
-                    <button type="button" onclick="document.getElementById('reportPanel').style.display='none'" style="background:#f4f6f9; border:1px solid #ccc; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:600; color:#555; font-size: 12px; font-family:'Poppins', sans-serif;">Close</button>
+                    <button type="button" id="btnDownloadPDF" class="btn-download"><i data-lucide="file-text" style="width:14px;"></i> Download PDF</button>
+                    <button type="button" onclick="document.getElementById('reportPanel').style.display='none'" style="background:#f4f6f9; border:1px solid #ccc; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:600; font-size: 12px;">Close</button>
                 </div>
             </div>
             <div class="table-responsive">
@@ -173,11 +115,11 @@
                     <thead>
                         <tr>
                             <th style="width: 30px;">No</th>
-                            <th>Description (Item & Part No.)</th>
-                            <th>Appr Qty</th>
+                            <th>Item Description</th>
+                            <th>Qty</th>
                             <th>ROB</th>
-                            <th>Limit Hrs</th>
-                            <th>Target Cyl (Over Limit)</th>
+                            <th>Limit</th>
+                            <th>Target Cyl</th>
                             <th>AI Recommendation</th>
                         </tr>
                     </thead>
@@ -191,28 +133,23 @@
         if (typeof lucide !== 'undefined') { lucide.createIcons(); }
         const WEBHOOK_URL = "https://n8.waruna-group.co.id/webhook/277b56f1-5761-412a-9be5-86298d5aa5de";
         let currentAuditData = [];
+        let currentVessel = "Unknown Vessel";
 
         async function sendToN8n(payloadData, progressMessages) {
             const btn = document.getElementById('submitBtn');
             let step = 0;
             btn.innerHTML = `<div class="loader"></div> ${progressMessages[step]}`;
-            
             let progressInterval = setInterval(() => {
                 step++;
-                if (step < progressMessages.length) {
-                    btn.innerHTML = `<div class="loader"></div> ${progressMessages[step]}`;
-                } else {
-                    clearInterval(progressInterval);
-                }
+                if (step < progressMessages.length) btn.innerHTML = `<div class="loader"></div> ${progressMessages[step]}`;
+                else clearInterval(progressInterval);
             }, 3500);
 
             try {
                 let response = await fetch(WEBHOOK_URL, { method: 'POST', body: payloadData });
-                if (!response.ok) throw new Error("Connection refused by n8n Server.");
+                if (!response.ok) throw new Error("Connection failed.");
                 return await response.json();
-            } finally {
-                clearInterval(progressInterval); 
-            }
+            } finally { clearInterval(progressInterval); }
         }
 
         document.getElementById('auditForm').addEventListener('submit', async function(e) {
@@ -234,15 +171,13 @@
             btn.disabled = true;
 
             const baseFormData = new FormData();
-            baseFormData.append('auth_pin', document.getElementById('authPin').value);
-            baseFormData.append('vessel_name', document.getElementById('vesselName').value.toUpperCase());
             baseFormData.append('engine_type', document.getElementById('engineType').value);
             baseFormData.append('job_id', `JOB-${Date.now()}`);
 
             try {
                 let finalData = null;
-                const rhMsgs = ["[1/2] Updating RH Database...", "[1/2] Extracting Document data...", "[1/2] Syncing with Server..."];
-                const comboReqMsgs = ["[2/2] Analyzing Requisition...", "[2/2] AI Cross-checking limits...", "[2/2] Applying SOP Rules..."];
+                const rhMsgs = ["Detecting Vessel Name...", "Reading RH Excel...", "Syncing Database..."];
+                const comboReqMsgs = ["Extracting Requisition...", "AI Cross-checking Data...", "Finalizing Audit..."];
 
                 if (rhFile && reqFile) {
                     let formRH = new FormData();
@@ -254,31 +189,30 @@
                     for (let pair of baseFormData.entries()) formReq.append(pair[0], pair[1]);
                     formReq.append('Requisition_Report', reqFile);
                     finalData = await sendToN8n(formReq, comboReqMsgs);
-                } 
-                else if (rhFile) {
+                } else if (rhFile) {
                     let formRH = new FormData();
                     for (let pair of baseFormData.entries()) formRH.append(pair[0], pair[1]);
                     formRH.append('RH_Report', rhFile);
-                    finalData = await sendToN8n(formRH, ["Updating RH Database...", "Processing document..."]);
-                }
-                else {
+                    finalData = await sendToN8n(formRH, ["Processing RH Data..."]);
+                } else {
                     let formReq = new FormData();
                     for (let pair of baseFormData.entries()) formReq.append(pair[0], pair[1]);
                     formReq.append('Requisition_Report', reqFile);
-                    finalData = await sendToN8n(formReq, ["AI Analyzing Requisition...", "Matching with Mandatory Items...", "Calculating allowances..."]);
+                    finalData = await sendToN8n(formReq, ["AI Analyzing Requisition..."]);
                 }
 
                 if (finalData && finalData.status === "success") {
                     resultBox.style.display = 'block';
-                    // Mengubah pesan sukses dari bahasa Indonesia ke Inggris (atau ambil dari finalData if pre-set in n8n)
-                    resultBox.innerHTML = `<strong>Success!</strong><br>Logistics audit completed successfully!`;
+                    resultBox.innerHTML = `<strong>Success!</strong> Audit completed.`;
                     
-                    if (finalData.audit_data && Array.isArray(finalData.audit_data)) {
+                    if (finalData.audit_data && finalData.audit_data.length > 0) {
                         currentAuditData = finalData.audit_data;
+                        currentVessel = finalData.audit_data[0].Nama_Kapal || "Unknown Vessel";
+                        document.getElementById('reportTitle').innerHTML = `<i data-lucide="ship"></i> ${currentVessel} - ${finalData.audit_data[0].Tipe_Mesin}`;
                         
                         let groupedData = {};
                         finalData.audit_data.forEach(item => {
-                            let sub = item.Subsystem && item.Subsystem !== "-" ? item.Subsystem : "UNDEFINED SUBSYSTEM";
+                            let sub = item.Subsystem && item.Subsystem !== "-" ? item.Subsystem : "GENERAL";
                             if (!groupedData[sub]) groupedData[sub] = [];
                             groupedData[sub].push(item);
                         });
@@ -286,82 +220,81 @@
                         for (let sub in groupedData) {
                             let subTr = document.createElement('tr');
                             subTr.className = 'subsystem-header';
-                            subTr.innerHTML = `<td colspan="7"><i data-lucide="layers" style="width:14px;height:14px;vertical-align:middle;margin-right:6px;"></i> Subsystem: ${sub}</td>`;
+                            subTr.innerHTML = `<td colspan="7">SUB-SYSTEM: ${sub}</td>`;
                             tableBody.appendChild(subTr);
 
                             groupedData[sub].forEach(item => {
                                 let aiStatus = item.AI_Status || "";
                                 let isMandatory = (aiStatus !== "NON-CRITICAL");
-                                
-                                let typeBadge = isMandatory ? `<span class="badge-type-mandatory">MANDATORY</span>` : `<span class="badge-type-consumable">CONSUMABLE</span>`;
-                                let aliasBadge = item.Tipe_Match === "ALIAS" ? `<br><span class="badge-alias"><i data-lucide="link" style="width:10px;height:10px;"></i> MAPPED: ${item.Nama_Master}</span>` : "";
-
-                                let descriptionHtml = `
-                                    <td style="max-width: 250px; white-space: normal;">
-                                        <div style="font-weight: 600; color: var(--primary);">${item.Nama_Barang}</div>
-                                        <div style="color: #7f8c8d; font-size: 11px; margin-top: 2px;">PN: ${item.No_Part !== "-" ? item.No_Part : "N/A"}</div>
-                                        ${typeBadge} ${aliasBadge}
-                                    </td>`;
-
-                                let aiRecHtml = "";
-                                if (!isMandatory) {
-                                    aiRecHtml = `<span style="color:#bdc3c7; font-size: 11px; font-weight:500; font-style:italic;">No limit checking required.</span>`;
-                                } else {
-                                    let statusClass = "badge-aman";
-                                    if (aiStatus === "REDUCED") statusClass = "badge-pangkas";
-                                    else if (aiStatus === "UNDER-ORDER") statusClass = "badge-kurang";
-
-                                    let warningHtml = item.Warning_Text ? `<div style="color:#c0392b; font-weight:bold; font-size:10px; margin-bottom:4px;">${item.Warning_Text}</div>` : "";
-                                    let bulletPoints = (item.Rekomendasi_AI || "").split("|").map(b => `<li style="margin-bottom:3px;">${b.trim()}</li>`).join("");
-                                    
-                                    aiRecHtml = `
-                                        ${warningHtml}
-                                        <span class="badge ${statusClass}" style="margin-bottom:8px; display:inline-block;">${aiStatus}</span>
-                                        <ul style="margin: 0; padding-left: 15px; font-size: 11px; color: #444; line-height:1.4;">
-                                            ${bulletPoints}
-                                        </ul>
-                                    `;
-                                }
+                                let statusClass = aiStatus === "REDUCED" ? "badge-pangkas" : (aiStatus === "UNDER-ORDER" ? "badge-kurang" : "badge-aman");
+                                let bullets = (item.Rekomendasi_AI || "").split("|").map(b => `• ${b.trim()}`).join("\n");
 
                                 let tr = document.createElement('tr');
                                 tr.innerHTML = `
-                                    <td style="font-weight:600; color:#b59ebc;">#${item.No_Item_PDF || "-"}</td>
-                                    ${descriptionHtml}
-                                    <td><strong style="font-size:13px; color:var(--primary);">${item.Qty_Diminta}</strong></td>
+                                    <td style="color:#999;">#${item.No_Item_PDF || "-"}</td>
+                                    <td>
+                                        <div style="font-weight:600;">${item.Nama_Barang}</div>
+                                        <div style="font-size:10px;color:#888;">PN: ${item.No_Part}</div>
+                                        ${isMandatory ? '<span class="badge-type-mandatory">MANDATORY</span>' : ''}
+                                    </td>
+                                    <td><strong>${item.Qty_Diminta}</strong></td>
                                     <td>${item.ROB}</td>
                                     <td>${item.Max_Limit_Jam}</td>
-                                    <td><span style="color: #c0392b; font-weight: 600;">${item.Target_Cylinder}</span></td>
-                                    <td>${aiRecHtml}</td>
+                                    <td style="color:#c0392b; font-weight:600;">${item.Target_Cylinder}</td>
+                                    <td>
+                                        ${item.Warning_Text ? `<div style="color:red;font-weight:bold;font-size:10px;">${item.Warning_Text}</div>` : ''}
+                                        <span class="badge ${statusClass}">${aiStatus}</span>
+                                        <div style="font-size:10px;white-space:pre-line;margin-top:5px;line-height:1.2;">${isMandatory ? bullets : 'Non-critical item.'}</div>
+                                    </td>
                                 `;
                                 tableBody.appendChild(tr);
                             });
                         }
                         reportPanel.style.display = 'block';
+                        if (typeof lucide !== 'undefined') { lucide.createIcons(); }
                     }
                 }
-            } catch (error) {
-                errorBox.style.display = 'block'; errorBox.innerHTML = error.message;
-            } finally {
-                btn.disabled = false; btn.innerHTML = '<i data-lucide="send"></i> PROCESS DATA NOW';
-                if (typeof lucide !== 'undefined') { lucide.createIcons(); }
-            }
+            } catch (err) { errorBox.style.display = 'block'; errorBox.innerHTML = err.message; }
+            finally { btn.disabled = false; btn.innerHTML = '<i data-lucide="send"></i> START AUDIT PROCESS'; }
         });
 
-        document.getElementById('btnDownload').addEventListener('click', function() {
-            if (currentAuditData.length === 0) return;
-            let csvContent = "data:text/csv;charset=utf-8,";
-            let headers = Object.keys(currentAuditData[0]).join(",");
-            csvContent += headers + "\r\n";
-            currentAuditData.forEach(function(rowObj) {
-                let row = Object.values(rowObj).map(val => `"${String(val).replace(/"/g, '""')}"`).join(",");
-                csvContent += row + "\r\n";
+        // FUNCTION DOWNLOAD PDF
+        document.getElementById('btnDownloadPDF').addEventListener('click', function() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4');
+            
+            doc.setFontSize(18);
+            doc.setTextColor(78, 43, 92);
+            doc.text(`Logistics Audit Report: ${currentVessel}`, 14, 20);
+            
+            doc.setFontSize(10);
+            doc.setTextColor(100);
+            doc.text(`Generated on: ${new Date().toLocaleString()} | Machine: ${currentAuditData[0].Tipe_Mesin}`, 14, 28);
+
+            const tableData = [];
+            currentAuditData.forEach(item => {
+                tableData.push([
+                    item.No_Item_PDF,
+                    `${item.Nama_Barang}\n(PN: ${item.No_Part})`,
+                    item.Qty_Diminta,
+                    item.ROB,
+                    item.Max_Limit_Jam,
+                    item.Target_Cylinder,
+                    `${item.AI_Status}\n${item.Rekomendasi_AI.replace(/\|/g, '\n•')}`
+                ]);
             });
-            let link = document.createElement("a");
-            link.setAttribute("href", encodeURI(csvContent));
-            link.setAttribute("download", `Audit_Report_${new Date().getTime()}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+
+            doc.autoTable({
+                startY: 35,
+                head: [['No', 'Description', 'Qty', 'ROB', 'Limit', 'Target Cyl', 'AI Recommendation']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: { fillColor: [78, 43, 92] },
+                styles: { fontSize: 8, cellPadding: 3 },
+                columnStyles: { 6: { cellWidth: 50 } }
+            });
+
+            doc.save(`Audit_Report_${currentVessel}_${Date.now()}.pdf`);
         });
     </script>
 </body>
