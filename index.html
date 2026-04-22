@@ -51,12 +51,16 @@
         th { background-color: #f4f6f9; padding: 12px; text-align: left; font-weight: 700; color: #333; border-bottom: 2px solid #ddd; }
         td { padding: 12px; border-bottom: 1px solid #eee; vertical-align: top; }
         tr:hover { background-color: #f9f9f9; }
+        .subsystem-header { background-color: #eaecee !important; font-weight: 700; color: #2c3e50; font-size: 13px; padding: 10px 15px !important; border-top: 2px solid #bdc3c7; }
+        .subsystem-header:hover { background-color: #eaecee !important; }
         
         .badge { padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
         .badge-aman { background-color: #e9f7ef; color: #1e8449; border: 1px solid #a3e4d7; }
         .badge-pangkas { background-color: #fadbd8; color: #cb4335; border: 1px solid #f5b7b1; }
         .badge-kurang { background-color: #fcf3cf; color: #d4ac0d; border: 1px solid #f9e79f; }
         .badge-alias { font-size: 10px; color: #d35400; font-weight: 700; background: #fdebd0; padding: 3px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; border: 1px solid #f5cba7; }
+        .badge-type-mandatory { font-size: 9px; background: #e8f8f5; color: #117a65; padding: 2px 5px; border-radius: 3px; border: 1px solid #a3e4d7; font-weight: 700; display: inline-block; margin-top: 4px;}
+        .badge-type-consumable { font-size: 9px; background: #f2f4f4; color: #7f8c8d; padding: 2px 5px; border-radius: 3px; border: 1px solid #d5dbdb; font-weight: 700; display: inline-block; margin-top: 4px;}
 
         .btn-download { background-color: #27ae60; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s;}
         .btn-download:hover { background-color: #1e8449; }
@@ -120,9 +124,9 @@
                 <table id="auditTable">
                     <thead>
                         <tr>
-                            <th>Item Name</th>
-                            <th>Part No. / Subsystem</th>
-                            <th>SPB Appr Qty</th>
+                            <th style="width: 30px;">No</th>
+                            <th>Description (Item & Part No.)</th>
+                            <th>Appr Qty</th>
                             <th>ROB</th>
                             <th>Limit Hrs</th>
                             <th>Target Cyl (Over Limit)</th>
@@ -222,57 +226,75 @@
                     
                     if (finalData.audit_data && Array.isArray(finalData.audit_data)) {
                         currentAuditData = finalData.audit_data;
+                        
+                        // 1. KELOMPOKKAN DATA BERDASARKAN SUBSYSTEM
+                        let groupedData = {};
                         finalData.audit_data.forEach(item => {
-                            
-                            // 1. RENDER ITEM NAME + SEQUENCE NUMBER
-                            let itemNameHtml = `
-                                <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;" title="${item.Nama_Barang}">
-                                    <span style="color: #7f8c8d; font-size: 10px; font-weight: bold;">#${item.No_Item_PDF || "-"}</span><br>
-                                    ${item.Nama_Barang}
-                                </td>`;
-                            if (item.Tipe_Match === "ALIAS") {
-                                itemNameHtml = `
-                                <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;" title="${item.Nama_Barang}">
-                                    <span style="color: #7f8c8d; font-size: 10px; font-weight: bold;">#${item.No_Item_PDF || "-"}</span><br>
-                                    ${item.Nama_Barang}<br>
-                                    <span class="badge-alias"><i data-lucide="link" style="width:10px;height:10px;"></i> MAPPED: ${item.Nama_Master}</span>
-                                </td>`;
-                            }
-
-                            // 2. RENDER AI RECOMMENDATION LOGIC
-                            let aiRecHtml = "";
-                            if (item.AI_Status === "NON-CRITICAL") {
-                                aiRecHtml = `<span style="color:#7f8c8d; font-size: 11px; font-weight:600;">- NON CRITICAL -</span>`;
-                            } else {
-                                let statusClass = "badge-aman";
-                                if (item.AI_Status === "REDUCED") statusClass = "badge-pangkas";
-                                else if (item.AI_Status === "UNDER-ORDER") statusClass = "badge-kurang";
-
-                                let warningHtml = item.Warning_Text ? `<div style="color:#c0392b; font-weight:bold; font-size:10px; margin-bottom:4px;">${item.Warning_Text}</div>` : "";
-                                let bulletPoints = item.Rekomendasi_AI.split("|").map(b => `<li style="margin-bottom:3px;">${b.trim()}</li>`).join("");
-                                
-                                aiRecHtml = `
-                                    ${warningHtml}
-                                    <span class="badge ${statusClass}" style="margin-bottom:8px; display:inline-block;">${item.AI_Status}</span>
-                                    <ul style="margin: 0; padding-left: 15px; font-size: 11px; color: #444;">
-                                        ${bulletPoints}
-                                    </ul>
-                                `;
-                            }
-
-                            // 3. RENDER TABLE ROW
-                            let tr = document.createElement('tr');
-                            tr.innerHTML = `
-                                ${itemNameHtml}
-                                <td>${item.No_Part}<br><span style="font-size: 10px; color: #7f8c8d;">${item.Subsystem || "-"}</span></td>
-                                <td><strong>${item.Qty_Diminta}</strong></td>
-                                <td>${item.ROB}</td>
-                                <td>${item.Max_Limit_Jam}</td>
-                                <td><span style="color: #c0392b; font-weight: 600;">${item.Target_Cylinder}</span></td>
-                                <td>${aiRecHtml}</td>
-                            `;
-                            tableBody.appendChild(tr);
+                            let sub = item.Subsystem && item.Subsystem !== "-" ? item.Subsystem : "UNDEFINED SUBSYSTEM";
+                            if (!groupedData[sub]) groupedData[sub] = [];
+                            groupedData[sub].push(item);
                         });
+
+                        // 2. RENDER TABEL BERDASARKAN GRUP
+                        for (let sub in groupedData) {
+                            // Cetak Header Subsystem
+                            let subTr = document.createElement('tr');
+                            subTr.className = 'subsystem-header';
+                            subTr.innerHTML = `<td colspan="7"><i data-lucide="layers" style="width:14px;height:14px;vertical-align:middle;margin-right:6px;"></i> Subsystem: ${sub}</td>`;
+                            tableBody.appendChild(subTr);
+
+                            // Cetak Item di dalam Subsystem tersebut
+                            groupedData[sub].forEach(item => {
+                                let aiStatus = item.AI_Status || "";
+                                let isMandatory = (aiStatus !== "NON-CRITICAL");
+                                
+                                // Label Mandatory/Consumable
+                                let typeBadge = isMandatory ? `<span class="badge-type-mandatory">MANDATORY</span>` : `<span class="badge-type-consumable">CONSUMABLE</span>`;
+                                
+                                // Alias Badge
+                                let aliasBadge = item.Tipe_Match === "ALIAS" ? `<br><span class="badge-alias"><i data-lucide="link" style="width:10px;height:10px;"></i> MAPPED: ${item.Nama_Master}</span>` : "";
+
+                                let descriptionHtml = `
+                                    <td style="max-width: 250px; white-space: normal;">
+                                        <div style="font-weight: 600; color: #2c3e50;">${item.Nama_Barang}</div>
+                                        <div style="color: #7f8c8d; font-size: 11px; margin-top: 2px;">PN: ${item.No_Part !== "-" ? item.No_Part : "N/A"}</div>
+                                        ${typeBadge} ${aliasBadge}
+                                    </td>`;
+
+                                // AI Recommendation HTML
+                                let aiRecHtml = "";
+                                if (!isMandatory) {
+                                    aiRecHtml = `<span style="color:#bdc3c7; font-size: 11px; font-weight:600; font-style:italic;">No limit checking required.</span>`;
+                                } else {
+                                    let statusClass = "badge-aman";
+                                    if (aiStatus === "REDUCED") statusClass = "badge-pangkas";
+                                    else if (aiStatus === "UNDER-ORDER") statusClass = "badge-kurang";
+
+                                    let warningHtml = item.Warning_Text ? `<div style="color:#c0392b; font-weight:bold; font-size:10px; margin-bottom:4px;">${item.Warning_Text}</div>` : "";
+                                    let bulletPoints = (item.Rekomendasi_AI || "").split("|").map(b => `<li style="margin-bottom:3px;">${b.trim()}</li>`).join("");
+                                    
+                                    aiRecHtml = `
+                                        ${warningHtml}
+                                        <span class="badge ${statusClass}" style="margin-bottom:8px; display:inline-block;">${aiStatus}</span>
+                                        <ul style="margin: 0; padding-left: 15px; font-size: 11px; color: #444; line-height:1.4;">
+                                            ${bulletPoints}
+                                        </ul>
+                                    `;
+                                }
+
+                                let tr = document.createElement('tr');
+                                tr.innerHTML = `
+                                    <td style="font-weight:bold; color:#7f8c8d;">#${item.No_Item_PDF || "-"}</td>
+                                    ${descriptionHtml}
+                                    <td><strong style="font-size:13px;">${item.Qty_Diminta}</strong></td>
+                                    <td>${item.ROB}</td>
+                                    <td>${item.Max_Limit_Jam}</td>
+                                    <td><span style="color: #c0392b; font-weight: 600;">${item.Target_Cylinder}</span></td>
+                                    <td>${aiRecHtml}</td>
+                                `;
+                                tableBody.appendChild(tr);
+                            });
+                        }
                         reportPanel.style.display = 'block';
                     }
                 }
