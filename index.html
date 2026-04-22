@@ -72,16 +72,14 @@
         <div class="form-column">
             <div class="header">
                 <h2><i data-lucide="shield-check"></i> SPB Logistics Portal</h2>
-                <p>Auto-Vessel Detection & Audit System</p>
+                <p>Engine Audit System (ME & AE Only)</p>
             </div>
             <form id="auditForm">
                 <div class="form-group">
-                    <label>Engine Type Selection</label>
+                    <label>Engine Category</label>
                     <select id="engineType" required>
                         <option value="ME">Main Engine (ME)</option>
-                        <option value="AE 1">Aux Engine 1 (AE 1)</option>
-                        <option value="AE 2">Aux Engine 2 (AE 2)</option>
-                        <option value="AE 3">Aux Engine 3 (AE 3)</option>
+                        <option value="AE">Aux Engine (AE)</option>
                     </select>
                 </div>
                 <div class="upload-section rh">
@@ -115,7 +113,7 @@
                     <thead>
                         <tr>
                             <th style="width: 30px;">No</th>
-                            <th>Item Description</th>
+                            <th>Description</th>
                             <th>Qty</th>
                             <th>ROB</th>
                             <th>Limit</th>
@@ -176,8 +174,8 @@
 
             try {
                 let finalData = null;
-                const rhMsgs = ["Detecting Vessel Name...", "Reading RH Excel...", "Syncing Database..."];
-                const comboReqMsgs = ["Extracting Requisition...", "AI Cross-checking Data...", "Finalizing Audit..."];
+                const rhMsgs = ["Auto-detecting Vessel...", "Processing RH File...", "Updating Master..."];
+                const comboReqMsgs = ["Analyzing Requisition...", "Verifying Limits...", "Finalizing Audit..."];
 
                 if (rhFile && reqFile) {
                     let formRH = new FormData();
@@ -198,12 +196,12 @@
                     let formReq = new FormData();
                     for (let pair of baseFormData.entries()) formReq.append(pair[0], pair[1]);
                     formReq.append('Requisition_Report', reqFile);
-                    finalData = await sendToN8n(formReq, ["AI Analyzing Requisition..."]);
+                    finalData = await sendToN8n(formReq, ["Analyzing Requisition..."]);
                 }
 
                 if (finalData && finalData.status === "success") {
                     resultBox.style.display = 'block';
-                    resultBox.innerHTML = `<strong>Success!</strong> Audit completed.`;
+                    resultBox.innerHTML = `<strong>Success!</strong> Audit results generated.`;
                     
                     if (finalData.audit_data && finalData.audit_data.length > 0) {
                         currentAuditData = finalData.audit_data;
@@ -233,7 +231,7 @@
                                 tr.innerHTML = `
                                     <td style="color:#999;">#${item.No_Item_PDF || "-"}</td>
                                     <td>
-                                        <div style="font-weight:600;">${item.Nama_Barang}</div>
+                                        <div style="font-weight:600; color:var(--primary);">${item.Nama_Barang}</div>
                                         <div style="font-size:10px;color:#888;">PN: ${item.No_Part}</div>
                                         ${isMandatory ? '<span class="badge-type-mandatory">MANDATORY</span>' : ''}
                                     </td>
@@ -258,24 +256,24 @@
             finally { btn.disabled = false; btn.innerHTML = '<i data-lucide="send"></i> START AUDIT PROCESS'; }
         });
 
-        // FUNCTION DOWNLOAD PDF
+        // FUNCTION DOWNLOAD PDF (Landscape Format)
         document.getElementById('btnDownloadPDF').addEventListener('click', function() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('l', 'mm', 'a4');
             
-            doc.setFontSize(18);
+            doc.setFontSize(16);
             doc.setTextColor(78, 43, 92);
-            doc.text(`Logistics Audit Report: ${currentVessel}`, 14, 20);
+            doc.text(`Waruna Logistics Audit: ${currentVessel}`, 14, 20);
             
-            doc.setFontSize(10);
+            doc.setFontSize(9);
             doc.setTextColor(100);
-            doc.text(`Generated on: ${new Date().toLocaleString()} | Machine: ${currentAuditData[0].Tipe_Mesin}`, 14, 28);
+            doc.text(`Generated: ${new Date().toLocaleString()} | Category: ${currentAuditData[0].Tipe_Mesin}`, 14, 28);
 
             const tableData = [];
             currentAuditData.forEach(item => {
                 tableData.push([
                     item.No_Item_PDF,
-                    `${item.Nama_Barang}\n(PN: ${item.No_Part})`,
+                    `${item.Nama_Barang} (PN: ${item.No_Part})`,
                     item.Qty_Diminta,
                     item.ROB,
                     item.Max_Limit_Jam,
@@ -286,15 +284,15 @@
 
             doc.autoTable({
                 startY: 35,
-                head: [['No', 'Description', 'Qty', 'ROB', 'Limit', 'Target Cyl', 'AI Recommendation']],
+                head: [['No', 'Item Description', 'Qty', 'ROB', 'Limit', 'Target Cyl', 'AI Recommendation']],
                 body: tableData,
                 theme: 'grid',
-                headStyles: { fillColor: [78, 43, 92] },
-                styles: { fontSize: 8, cellPadding: 3 },
-                columnStyles: { 6: { cellWidth: 50 } }
+                headStyles: { fillColor: [78, 43, 92], fontSize: 9 },
+                styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+                columnStyles: { 6: { cellWidth: 60 } }
             });
 
-            doc.save(`Audit_Report_${currentVessel}_${Date.now()}.pdf`);
+            doc.save(`Audit_${currentVessel}_${Date.now()}.pdf`);
         });
     </script>
 </body>
